@@ -4,6 +4,10 @@ version = "0.1.0"
 description = "Minimal path extraction"
 authors = ["Eugene Prilepin <esp.home@gmail.com>"]
 license = "MIT"
+readme = "README.md"
+keywords = ["mpe", "fmm", "minimal-path", "fast-marching"]
+
+repository = "https://github.com/espdev/mpe"
 
 [tool.poetry.dependencies]
 python = "^3.6"
