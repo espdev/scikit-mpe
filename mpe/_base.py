@@ -1,34 +1,43 @@
 # -*- coding: utf-8 -*-
 
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Sequence, overload
 
 from pydantic import BaseModel, Extra, validator, root_validator, confloat, conint
-
 import numpy as np
-import skfmm as fmm
+
+from ._helpers import set_module, singledispatch
 
 
-PointType = Tuple[int, ...]
+PointType = Sequence[int]
+WayPointsType = Sequence[PointType]
+PointTypeModel = Tuple[int, ...]
+WayPointsTypeModel = Tuple[PointTypeModel, ...]
 
+
+MPE_MODULE = 'mpe'
 MIN_NDIM = 2
 
 
 class ImmutableDataObject(BaseModel):
+    """Base immutable data object with validating fields
+    """
+
     class Config:
         extra = Extra.forbid
         arbitrary_types_allowed = True
         allow_mutation = False
 
 
+@set_module(MPE_MODULE)
 class InitialInfo(ImmutableDataObject):
-    """
+    """Initial info for extracting path
     """
 
     speed_data: np.ndarray
 
-    start_point: PointType
-    end_point: PointType
-    way_points: Optional[Tuple[PointType, ...]] = None
+    start_point: PointTypeModel
+    end_point: PointTypeModel
+    way_points: Optional[WayPointsTypeModel] = None
 
     @root_validator
     def _check_ndim(cls, values):
@@ -90,29 +99,62 @@ class InitialInfo(ImmutableDataObject):
         return v
 
 
+@set_module(MPE_MODULE)
 class Parameters(ImmutableDataObject):
+    """MPE algorithm parameters
+    """
+
     fmm_grid_spacing: confloat(gt=0.0) = 1.0
     extract_grid_spacing: confloat(gt=0.0) = 1.0
     max_iterations: conint(ge=100) = 1000
 
 
+@set_module(MPE_MODULE)
 class ResultPathInfo(ImmutableDataObject):
+    """Extracted path info
+    """
+
     full_path: np.ndarray
     travel_times: Tuple[np.ndarray, ...]
 
 
-def mpe(init_info: InitialInfo, params: Optional[Parameters] = None) -> ResultPathInfo:
-    """
+@overload
+def mpe(speed_data: np.ndarray, *,
+        start_point: PointType,
+        end_point: PointType,
+        way_points: Optional[WayPointsType] = None,
+        params: Optional[Parameters] = None) -> ResultPathInfo:
+    pass
 
-    Parameters
-    ----------
-    init_info
-    params
+
+@overload
+def mpe(init_info: InitialInfo, *,
+        params: Optional[Parameters] = None) -> ResultPathInfo:
+    pass
+
+
+@set_module(MPE_MODULE)
+@singledispatch
+def mpe(*args, **kwargs) -> ResultPathInfo:  # noqa
+    """Extracts a minimal path
+
+    Usage
+    -----
+
+    .. code-block:: python
+
+        mpe(init_info: InitialInfo, *,
+            params: Optional[Parameters] = None) -> ResultPathInfo
+
+        mpe(speed_data: np.ndarray, *,
+            start_point: Sequence[int],
+            end_point: Sequence[int],
+            way_points: Optional[Sequence[Sequence[int]]] = None,
+            params: Optional[Parameters] = None) -> ResultPathInfo
 
     Returns
     -------
+    path_info : ResultPathInfo
+        Extracted path info
 
     """
-
-    if params is None:
-        params = Parameters()

@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 from pydantic import ValidationError
 
-from mpe import InitialInfo
+from mpe import InitialInfo, mpe
 
 
 @pytest.mark.parametrize('speed_data, start_point, end_point, way_points', [
@@ -65,3 +65,12 @@ def test_invalid_initial_info():
     with pytest.raises(ValidationError):
         InitialInfo(speed_data=speed_data, start_point=(3, 4), end_point=(2, 3),
                     way_points=((2, 2), (5, 6)))
+
+
+@pytest.mark.parametrize('args, kwargs', [
+    ((10, 20), dict(start_point=(1, 2), end_point=(5, 5))),
+    ((10.0,), dict(start_point=(1, 2), end_point=(5, 5))),
+])
+def test_mpe_bad_signatures(args, kwargs):
+    with pytest.raises(TypeError, match='invalid signature'):
+        mpe(*args, **kwargs)
