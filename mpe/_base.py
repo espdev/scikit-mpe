@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from typing import Optional, Tuple, Sequence, overload
+import collections
 
 from pydantic import BaseModel, Extra, validator, root_validator, confloat, conint
 import numpy as np
@@ -37,7 +38,7 @@ class InitialInfo(ImmutableDataObject):
 
     start_point: PointTypeModel
     end_point: PointTypeModel
-    way_points: Optional[WayPointsTypeModel] = None
+    way_points: WayPointsTypeModel = ()
 
     @root_validator
     def _check_ndim(cls, values):
@@ -47,7 +48,10 @@ class InitialInfo(ImmutableDataObject):
         end_point = values.get('end_point')
         way_points = values.get('way_points')
 
-        if speed_data is None or start_point is None or end_point is None:
+        if (speed_data is None or
+                start_point is None or
+                end_point is None or
+                way_points is None):
             return values
 
         ndim = speed_data.ndim
@@ -58,10 +62,27 @@ class InitialInfo(ImmutableDataObject):
         if ndim != len(start_point) or ndim != len(end_point):
             raise ValueError(f"the start and end points must have dimension {ndim}.")
 
-        if way_points is not None:
-            for point in way_points:
-                if len(point) != ndim:
-                    raise ValueError(f"the start, end and all way points must have dimension {ndim}.")
+        for point in way_points:
+            if len(point) != ndim:
+                raise ValueError(f"the start, end and all way points must have dimension {ndim}.")
+
+        return values
+
+    @root_validator
+    def _check_point_duplicates(cls, values):
+        start_point = values.get('start_point')
+        end_point = values.get('end_point')
+        way_points = values.get('way_points')
+
+        if start_point is None or end_point is None or way_points is None:
+            return values
+
+        all_points = [start_point, end_point, *way_points]
+        duplicates = [point for point, count in collections.Counter(all_points).items() if count > 1]
+
+        if duplicates:
+            raise ValueError(
+                f'the points must not be duplicated, there are duplicated points: {duplicates}')
 
         return values
 
@@ -122,7 +143,7 @@ class ResultPathInfo(ImmutableDataObject):
 def mpe(speed_data: np.ndarray, *,
         start_point: PointType,
         end_point: PointType,
-        way_points: Optional[WayPointsType] = None,
+        way_points: WayPointsType = (),
         params: Optional[Parameters] = None) -> ResultPathInfo:
     pass
 
@@ -149,7 +170,7 @@ def mpe(*args, **kwargs) -> ResultPathInfo:  # noqa
         mpe(speed_data: np.ndarray, *,
             start_point: Sequence[int],
             end_point: Sequence[int],
-            way_points: Optional[Sequence[Sequence[int]]] = None,
+            way_points: Sequence[Sequence[int]] = (),
             params: Optional[Parameters] = None) -> ResultPathInfo
 
     Returns
