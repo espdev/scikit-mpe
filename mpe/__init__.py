@@ -1,15 +1,36 @@
 # -*- coding: utf-8 -*-
 
-__version__ = '0.1.0'
+from ._base import (
+    InitialInfo,
+    FastMarchingMethodOrder,
+    ExtractPointUpdateMethod,
+    Parameters,
+    PathInfo,
+    ResultPathInfo,
+    mpe
+)
 
-from ._base import InitialInfo, Parameters, mpe
+from ._exceptions import (
+    MPEError,
+    ComputeTravelTimeError
+)
 
 # register dispatchered implementation
 import mpe._impl as _impl  # noqa
 
 
+__version__ = '0.1.0'
+
 __all__ = [
     'InitialInfo',
+    'FastMarchingMethodOrder',
+    'ExtractPointUpdateMethod',
     'Parameters',
+    'PathInfo',
+    'ResultPathInfo',
+
+    'MPEError',
+    'ComputeTravelTimeError',
+
     'mpe',
 ]

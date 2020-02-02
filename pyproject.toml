@@ -12,8 +12,10 @@ repository = "https://github.com/espdev/mpe"
 [tool.poetry.dependencies]
 python = "^3.6"
 numpy = "^1.18.1"
+scipy = "^1.4.1"
 scikit-fmm = "^2019.1.30"
 pydantic = "^1.4"
+cached_property = "^1.5.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.3.5"

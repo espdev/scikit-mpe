@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from typing import Optional, Tuple, Sequence, overload
 import collections
+import enum
+import logging
+from typing import Optional, Tuple, Sequence, List, NamedTuple, overload
 
 from pydantic import BaseModel, Extra, validator, root_validator, confloat, conint
+from cached_property import cached_property
 import numpy as np
 
 from ._helpers import set_module, singledispatch
 
 
 PointType = Sequence[int]
+FloatPointType = Sequence[float]
 WayPointsType = Sequence[PointType]
 PointTypeModel = Tuple[int, ...]
 WayPointsTypeModel = Tuple[PointTypeModel, ...]
@@ -17,6 +21,10 @@ WayPointsTypeModel = Tuple[PointTypeModel, ...]
 
 MPE_MODULE = 'mpe'
 MIN_NDIM = 2
+
+
+logger = logging.getLogger(MPE_MODULE)
+logger.addHandler(logging.NullHandler())
 
 
 class ImmutableDataObject(BaseModel):
@@ -119,24 +127,60 @@ class InitialInfo(ImmutableDataObject):
 
         return v
 
+    @cached_property
+    def all_points(self) -> List[PointType]:
+        return [self.start_point, *self.way_points, self.end_point]
+
+    @cached_property
+    def point_intervals(self) -> List[Tuple[PointType, PointType]]:
+        all_points = self.all_points
+        return list(zip(all_points[:-1], all_points[1:]))
+
+
+@set_module(MPE_MODULE)
+class FastMarchingMethodOrder(enum.IntEnum):
+    first = 1
+    second = 2
+
+
+@set_module(MPE_MODULE)
+class ExtractPointUpdateMethod(str, enum.Enum):
+    euler = 'euler'
+    runge_kutta = 'runge_kutta'
+
 
 @set_module(MPE_MODULE)
 class Parameters(ImmutableDataObject):
     """MPE algorithm parameters
     """
 
-    fmm_grid_spacing: confloat(gt=0.0) = 1.0
-    extract_grid_spacing: confloat(gt=0.0) = 1.0
-    max_iterations: conint(ge=100) = 1000
+    fmm_grid_spacing: confloat(strict=True, gt=0.0) = 1.0
+    fmm_order: FastMarchingMethodOrder = FastMarchingMethodOrder.second
+    extract_grid_spacing: confloat(strict=True, gt=0.0) = 1.0
+    extract_max_iterations: conint(strict=True, ge=100) = 1000
+    extract_point_update_method: ExtractPointUpdateMethod = ExtractPointUpdateMethod.runge_kutta
+    reuse_computed_travel_time: bool = True
+
+
+@set_module(MPE_MODULE)
+class PathInfo(NamedTuple):
+    """Extracted path info
+    """
+
+    path: np.ndarray
+    start_point: PointType
+    end_point: PointType
+    travel_time: np.ndarray
+    reversed: bool
 
 
 @set_module(MPE_MODULE)
 class ResultPathInfo(ImmutableDataObject):
-    """Extracted path info
+    """Result path info
     """
 
-    full_path: np.ndarray
-    travel_times: Tuple[np.ndarray, ...]
+    path: np.ndarray
+    pieces: Tuple[PathInfo, ...]
 
 
 @overload
@@ -144,13 +188,13 @@ def mpe(speed_data: np.ndarray, *,
         start_point: PointType,
         end_point: PointType,
         way_points: WayPointsType = (),
-        params: Optional[Parameters] = None) -> ResultPathInfo:
+        parameters: Optional[Parameters] = None) -> ResultPathInfo:
     pass
 
 
 @overload
 def mpe(init_info: InitialInfo, *,
-        params: Optional[Parameters] = None) -> ResultPathInfo:
+        parameters: Optional[Parameters] = None) -> ResultPathInfo:
     pass
 
 
@@ -165,13 +209,13 @@ def mpe(*args, **kwargs) -> ResultPathInfo:  # noqa
     .. code-block:: python
 
         mpe(init_info: InitialInfo, *,
-            params: Optional[Parameters] = None) -> ResultPathInfo
+            parameters: Optional[Parameters] = None) -> ResultPathInfo
 
         mpe(speed_data: np.ndarray, *,
             start_point: Sequence[int],
             end_point: Sequence[int],
             way_points: Sequence[Sequence[int]] = (),
-            params: Optional[Parameters] = None) -> ResultPathInfo
+            parameters: Optional[Parameters] = None) -> ResultPathInfo
 
     Returns
     -------
