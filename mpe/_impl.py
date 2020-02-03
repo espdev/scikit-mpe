@@ -138,7 +138,7 @@ def extract_path(travel_time: np.ndarray,
             path_points.append(end_point)
             end_point_reached = True
             logger.debug(
-                'The minimal path was extracted in %d iterations', i + 1)
+                'The minimal path has been extracted in %d iterations', i + 1)
             break
 
     if not end_point_reached:

@@ -18,6 +18,7 @@ pydantic = "^1.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.3.5"
+pytest-benchmark = "^3.2.3"
 coverage = "^5.0.3"
 scikit-image = "^0.16.2"
 

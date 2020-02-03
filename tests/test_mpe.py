@@ -7,7 +7,7 @@ from mpe import mpe
 
 
 @pytest.mark.parametrize('start_point, end_point, point_count', [
-    ((57, 395), (675, 455), 1127),
+    ((37, 255), (484, 300), 752),
 ])
 def test_extract_without_waypoints(caplog, speed_image_retina, start_point, end_point, point_count):
     caplog.set_level(logging.DEBUG)
