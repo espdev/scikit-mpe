@@ -201,7 +201,7 @@ def extract_path_with_way_points(init_info: InitialInfo,
     speed_data = init_info.speed_data
     path_pieces_info = []
 
-    if parameters.reuse_computed_travel_time:
+    if parameters.travel_time_cache:
         compute_ttime = [True, False]
         last_travel_time = None
 

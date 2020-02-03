@@ -30,4 +30,4 @@ class Parameters(ImmutableDataObject):
     extract_grid_spacing: confloat(strict=True, gt=0.0) = 1.0
     extract_max_iterations: conint(strict=True, ge=100) = 2000
     extract_point_update_method: ExtractPointUpdateMethod = ExtractPointUpdateMethod.runge_kutta
-    reuse_computed_travel_time: bool = True
+    travel_time_cache: bool = False
