@@ -12,7 +12,9 @@ from ._base import (
 
 from ._exceptions import (
     MPEError,
-    ComputeTravelTimeError
+    ComputeTravelTimeError,
+    ExtractPathError,
+    EndPointNotReachedError,
 )
 
 # register dispatchered implementation
@@ -31,6 +33,8 @@ __all__ = [
 
     'MPEError',
     'ComputeTravelTimeError',
+    'ExtractPathError',
+    'EndPointNotReachedError',
 
     'mpe',
 ]
