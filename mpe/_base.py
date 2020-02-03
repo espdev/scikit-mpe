@@ -5,7 +5,6 @@ import logging
 from typing import Optional, Tuple, Sequence, List, NamedTuple, overload, TYPE_CHECKING
 
 from pydantic import BaseModel, Extra, validator, root_validator
-from cached_property import cached_property
 import numpy as np
 
 from ._helpers import set_module, singledispatch
@@ -129,13 +128,11 @@ class InitialInfo(ImmutableDataObject):
 
         return v
 
-    @cached_property
     def all_points(self) -> List[PointType]:
         return [self.start_point, *self.way_points, self.end_point]
 
-    @cached_property
     def point_intervals(self) -> List[Tuple[PointType, PointType]]:
-        all_points = self.all_points
+        all_points = self.all_points()
         return list(zip(all_points[:-1], all_points[1:]))
 
 

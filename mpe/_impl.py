@@ -206,7 +206,7 @@ def extract_path_with_way_points(init_info: InitialInfo,
         last_travel_time = None
 
         for (start_point, end_point), compute_tt in zip(
-                init_info.point_intervals, itertools.cycle(compute_ttime)):
+                init_info.point_intervals(), itertools.cycle(compute_ttime)):
             if compute_tt:
                 travel_time = compute_travel_time(speed_data, end_point, parameters)
                 last_travel_time = travel_time
@@ -226,7 +226,7 @@ def extract_path_with_way_points(init_info: InitialInfo,
                 reversed=is_reversed
             ))
     else:
-        for start_point, end_point in init_info.point_intervals:
+        for start_point, end_point in init_info.point_intervals():
             travel_time = compute_travel_time(speed_data, end_point, parameters)
             path = extract_path(travel_time, start_point, end_point, parameters)
 
