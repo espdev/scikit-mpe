@@ -4,15 +4,24 @@ import pytest
 import numpy as np
 from pydantic import ValidationError
 
-from mpe import InitialInfo, mpe
+from mpe import InitialInfo
 
 
-@pytest.mark.parametrize('speed_data, start_point, end_point, way_points', [
-    (np.zeros((10, 15)), (3, 4), (5, 6), ()),
-    (np.zeros((10, 15)), (3, 4), (5, 6), ((1, 2), (7, 8))),
+@pytest.mark.parametrize('shape, start_point, end_point, way_points', [
+    ((10, 15), (3, 4), (5, 6), ()),
+    ((10, 15, 12), (3, 4, 5), (5, 6, 7), ()),
+    ((10, 15), (3, 4), (5, 6), ((1, 2), (7, 8))),
+    ((10, 15, 12), (3, 4, 5), (5, 6, 7), ((1, 2, 3), (7, 8, 9))),
 ])
-def test_initial_info(speed_data, start_point, end_point, way_points):
-    info = InitialInfo(speed_data=speed_data, start_point=start_point, end_point=end_point, way_points=way_points)
+def test_basic(shape, start_point, end_point, way_points):
+    speed_data = np.zeros(shape)
+
+    info = InitialInfo(
+        speed_data=speed_data,
+        start_point=start_point,
+        end_point=end_point,
+        way_points=way_points
+    )
 
     assert info.speed_data == pytest.approx(speed_data)
     assert info.start_point == start_point
@@ -20,71 +29,91 @@ def test_initial_info(speed_data, start_point, end_point, way_points):
     assert info.way_points == way_points
 
 
-def test_invalid_initial_info():
-    with pytest.raises(ValidationError):
-        InitialInfo(speed_data=np.zeros((10,)), start_point=(1,), end_point=(2,))
-
-    speed_data = np.zeros((10, 15))
-
-    # mismatch ndim
-    with pytest.raises(ValidationError):
-        InitialInfo(speed_data=speed_data, start_point=(1, 2), end_point=(3, 4, 5))
-
-    with pytest.raises(ValidationError):
-        InitialInfo(speed_data=speed_data, start_point=(1, 2, 3), end_point=(3, 4))
-
-    with pytest.raises(ValidationError):
-        InitialInfo(speed_data=speed_data, start_point=(1, 2, 3), end_point=(3, 4, 5))
-
-    with pytest.raises(ValidationError):
-        InitialInfo(speed_data=speed_data, start_point=(1, 2), end_point=(3, 4),
-                    way_points=((5, 6, 7), (7, 8, 9)))
-
-    with pytest.raises(ValidationError):
-        InitialInfo(speed_data=speed_data, start_point=(1, 2), end_point=(3, 4),
-                    way_points=((5, 6), (7, 8, 9)))
-
-    # out of bounds
-    with pytest.raises(ValidationError):
-        InitialInfo(speed_data=speed_data, start_point=(10, 2), end_point=(3, 4))
-
-    with pytest.raises(ValidationError):
-        InitialInfo(speed_data=speed_data, start_point=(1, 2), end_point=(3, 40))
-
-    # duplicates
-    with pytest.raises(ValidationError):
-        InitialInfo(speed_data=speed_data, start_point=(1, 2), end_point=(1, 2))
-
-    with pytest.raises(ValidationError):
-        InitialInfo(speed_data=speed_data, start_point=(1, 2), end_point=(3, 4), way_points=((3, 4), (5, 6)))
-
-    with pytest.raises(ValidationError):
-        InitialInfo(speed_data=speed_data, start_point=(1, 2), end_point=(3, 4), way_points=((5, 6), (5, 6)))
-
-    # inside masked area
-    mask = np.zeros((10, 15), dtype=np.bool_)
-    mask[(1, 5), (2, 6)] = True
-    speed_data = np.ma.masked_array(np.zeros((10, 15)), mask=mask)
-
-    with pytest.raises(ValidationError):
-        InitialInfo(speed_data=speed_data, start_point=(1, 2), end_point=(3, 4))
-
-    with pytest.raises(ValidationError):
-        InitialInfo(speed_data=speed_data, start_point=(3, 4), end_point=(5, 6))
-
-    with pytest.raises(ValidationError):
-        InitialInfo(speed_data=speed_data, start_point=(3, 4), end_point=(2, 3),
-                    way_points=((1, 2), (4, 4)))
-
-    with pytest.raises(ValidationError):
-        InitialInfo(speed_data=speed_data, start_point=(3, 4), end_point=(2, 3),
-                    way_points=((2, 2), (5, 6)))
+def test_invalid_ndim():
+    with pytest.raises(ValidationError, match='minimum dimension must be'):
+        InitialInfo(
+            speed_data=np.zeros((10,)),
+            start_point=(1,),
+            end_point=(2,)
+        )
 
 
-@pytest.mark.parametrize('args, kwargs', [
-    ((10, 20), dict(start_point=(1, 2), end_point=(5, 5))),
-    ((10.0,), dict(start_point=(1, 2), end_point=(5, 5))),
+@pytest.mark.parametrize('shape, start_point, end_point, way_points', [
+    ((10, 15), (1, 2), (3, 4, 5), ()),
+    ((10, 15), (1, 2, 3), (3, 4, 5), ()),
+    ((10, 15), (1, 2), (3, 4), ((5, 6), (7, 8, 9))),
+    ((10, 15), (1, 2), (3, 4), ((5, 6, 7), (7, 8, 9))),
+    ((10, 15, 12), (1, 2, 3), (3, 4), ()),
+    ((10, 15, 12), (1, 2), (3, 4), ()),
+    ((10, 15, 12), (1, 2, 3), (3, 4, 5), ((1, 2), (3, 4, 5))),
+    ((10, 15, 12), (1, 2, 3), (3, 4, 5), ((1, 2), (3, 4))),
 ])
-def test_mpe_bad_signatures(args, kwargs):
-    with pytest.raises(TypeError, match='invalid signature'):
-        mpe(*args, **kwargs)
+def test_mismatch_ndim(shape, start_point, end_point, way_points):
+    with pytest.raises(ValidationError, match='must have dimension'):
+        InitialInfo(
+            speed_data=np.zeros(shape),
+            start_point=start_point,
+            end_point=end_point,
+            way_points=way_points
+        )
+
+
+@pytest.mark.parametrize('shape, start_point, end_point, way_points', [
+    ((10, 15), (10, 2), (3, 4), ()),
+    ((10, 15), (1, 2), (3, 45), ()),
+    ((10, 15), (1, 2), (-3, 4), ()),
+    ((10, 15), (1, 2), (3, 4), ((10, 6), (7, 8))),
+    ((10, 15), (1, 2), (3, 4), ((5, 6), (7, 15))),
+    ((10, 15, 12), (1, 2, 30), (3, 4, 5), ()),
+    ((10, 15, 12), (1, 2, 10), (3, -4, 50), ()),
+    ((10, 15, 12), (1, 2, 3), (3, 4, 5), ((1, 2, 12), (3, 4, 5))),
+    ((10, 15, 12), (1, 2, 3), (3, 4, 5), ((1, 2, 3), (3, 4, -1))),
+])
+def test_out_of_bounds(shape, start_point, end_point, way_points):
+    with pytest.raises(ValidationError, match="is out of 'speed_data' bounds"):
+        InitialInfo(
+            speed_data=np.zeros(shape),
+            start_point=start_point,
+            end_point=end_point,
+            way_points=way_points
+        )
+
+
+@pytest.mark.parametrize('shape, start_point, end_point, way_points', [
+    ((10, 15), (1, 2), (1, 2), ()),
+    ((10, 15), (1, 2), (3, 4), ((3, 4), (5, 6))),
+    ((10, 15), (1, 2), (3, 4), ((5, 6), (5, 6))),
+    ((10, 15, 12), (1, 2, 3), (1, 2, 3), ()),
+    ((10, 15, 12), (1, 2, 3), (3, 4, 5), ((1, 2, 3), (3, 4, 7))),
+    ((10, 15, 12), (1, 2, 3), (3, 4, 5), ((1, 5, 2), (1, 5, 2))),
+])
+def test_duplicates(shape, start_point, end_point, way_points):
+    with pytest.raises(ValidationError, match='the points must not be duplicated'):
+        InitialInfo(
+            speed_data=np.zeros(shape),
+            start_point=start_point,
+            end_point=end_point,
+            way_points=way_points
+        )
+
+
+@pytest.mark.parametrize('shape, mask, start_point, end_point, way_points', [
+    ((10, 15), ((1, 5), (2, 6)), (1, 2), (3, 4), ()),
+    ((10, 15), ((1, 5), (2, 6)), (3, 4), (5, 6), ()),
+    ((10, 15), ((1, 5), (2, 6)), (3, 4), (2, 3), ((1, 2), (4, 4))),
+    ((10, 15), ((1, 5), (2, 6)), (3, 4), (2, 3), ((2, 2), (5, 6))),
+    ((10, 15, 12), ((1, 5), (2, 6), (7, 8)), (1, 2, 7), (2, 3, 4), ()),
+    ((10, 15, 12), ((1, 5), (2, 6), (7, 8)), (3, 4, 7), (5, 6, 8), ()),
+])
+def test_inside_masked_area(shape, mask, start_point, end_point, way_points):
+    mask_data = np.zeros(shape, dtype=np.bool_)
+    mask_data[mask] = True
+    speed_data = np.ma.masked_array(np.zeros(shape), mask=mask_data)
+
+    with pytest.raises(ValidationError, match="inside 'speed_data' masked area"):
+        InitialInfo(
+            speed_data=speed_data,
+            start_point=start_point,
+            end_point=end_point,
+            way_points=way_points,
+        )
