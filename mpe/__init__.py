@@ -2,12 +2,15 @@
 
 from ._base import (
     InitialInfo,
-    FastMarchingMethodOrder,
-    ExtractPointUpdateMethod,
-    Parameters,
     PathInfo,
     ResultPathInfo,
     mpe
+)
+
+from ._parameters import (
+    FastMarchingMethodOrder,
+    ExtractPointUpdateMethod,
+    Parameters,
 )
 
 from ._exceptions import (
@@ -25,11 +28,12 @@ __version__ = '0.1.0'
 
 __all__ = [
     'InitialInfo',
+    'PathInfo',
+    'ResultPathInfo',
+
     'FastMarchingMethodOrder',
     'ExtractPointUpdateMethod',
     'Parameters',
-    'PathInfo',
-    'ResultPathInfo',
 
     'MPEError',
     'ComputeTravelTimeError',

@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import collections
-import enum
 import logging
-from typing import Optional, Tuple, Sequence, List, NamedTuple, overload
+from typing import Optional, Tuple, Sequence, List, NamedTuple, overload, TYPE_CHECKING
 
-from pydantic import BaseModel, Extra, validator, root_validator, confloat, conint
+from pydantic import BaseModel, Extra, validator, root_validator
 from cached_property import cached_property
 import numpy as np
 
 from ._helpers import set_module, singledispatch
+
+if TYPE_CHECKING:
+    from ._parameters import Parameters
 
 
 PointType = Sequence[int]
@@ -138,31 +140,6 @@ class InitialInfo(ImmutableDataObject):
 
 
 @set_module(MPE_MODULE)
-class FastMarchingMethodOrder(enum.IntEnum):
-    first = 1
-    second = 2
-
-
-@set_module(MPE_MODULE)
-class ExtractPointUpdateMethod(str, enum.Enum):
-    euler = 'euler'
-    runge_kutta = 'runge_kutta'
-
-
-@set_module(MPE_MODULE)
-class Parameters(ImmutableDataObject):
-    """MPE algorithm parameters
-    """
-
-    fmm_grid_spacing: confloat(strict=True, gt=0.0) = 1.0
-    fmm_order: FastMarchingMethodOrder = FastMarchingMethodOrder.second
-    extract_grid_spacing: confloat(strict=True, gt=0.0) = 1.0
-    extract_max_iterations: conint(strict=True, ge=100) = 1000
-    extract_point_update_method: ExtractPointUpdateMethod = ExtractPointUpdateMethod.runge_kutta
-    reuse_computed_travel_time: bool = True
-
-
-@set_module(MPE_MODULE)
 class PathInfo(NamedTuple):
     """Extracted path info
     """
@@ -188,13 +165,13 @@ def mpe(speed_data: np.ndarray, *,
         start_point: PointType,
         end_point: PointType,
         way_points: WayPointsType = (),
-        parameters: Optional[Parameters] = None) -> ResultPathInfo:
+        parameters: Optional['Parameters'] = None) -> ResultPathInfo:
     pass  # pragma: no cover
 
 
 @overload
 def mpe(init_info: InitialInfo, *,
-        parameters: Optional[Parameters] = None) -> ResultPathInfo:
+        parameters: Optional['Parameters'] = None) -> ResultPathInfo:
     pass  # pragma: no cover
 
 

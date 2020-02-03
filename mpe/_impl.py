@@ -16,11 +16,14 @@ from ._base import (
     FloatPointType,
     WayPointsType,
     InitialInfo,
-    ExtractPointUpdateMethod,
-    Parameters,
     PathInfo,
     ResultPathInfo,
     logger,
+)
+
+from ._parameters import (
+    ExtractPointUpdateMethod,
+    Parameters,
 )
 
 from ._exceptions import (
