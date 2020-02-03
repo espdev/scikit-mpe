@@ -97,10 +97,10 @@ class InitialInfo(ImmutableDataObject):
     @validator('start_point', 'end_point', 'way_points')
     def _check_points(cls, v, field, values):
         if v is None:
-            return v
+            return v  # pragma: no cover
 
         if 'speed_data' not in values:
-            return v
+            return v  # pragma: no cover
 
         speed_data = values['speed_data']
 
@@ -189,13 +189,13 @@ def mpe(speed_data: np.ndarray, *,
         end_point: PointType,
         way_points: WayPointsType = (),
         parameters: Optional[Parameters] = None) -> ResultPathInfo:
-    pass
+    pass  # pragma: no cover
 
 
 @overload
 def mpe(init_info: InitialInfo, *,
         parameters: Optional[Parameters] = None) -> ResultPathInfo:
-    pass
+    pass  # pragma: no cover
 
 
 @set_module(MPE_MODULE)
