@@ -156,6 +156,10 @@ class ResultPathInfo(ImmutableDataObject):
     path: np.ndarray
     pieces: Tuple[PathInfo, ...]
 
+    @property
+    def point_count(self) -> int:
+        return self.path.shape[0]
+
 
 @overload
 def mpe(speed_data: np.ndarray, *,
