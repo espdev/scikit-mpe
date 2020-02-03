@@ -57,7 +57,7 @@ class PathPointCalculatorBase(abc.ABC):
         return tuple(self.update(np.array(point, dtype=np.float_)))
 
     def normalized_velocity(self, point: np.ndarray) -> np.ndarray:
-        velocity = np.array([gi(point) for gi in self.gradient_interpolants])
+        velocity = np.array([gi(point).squeeze() for gi in self.gradient_interpolants])
         return velocity / np.linalg.norm(velocity)
 
     @abc.abstractmethod
