@@ -29,6 +29,15 @@ def test_basic(shape, start_point, end_point, way_points):
     assert info.way_points == way_points
 
 
+def test_invalid_speed_data():
+    with pytest.raises(ValidationError, match='instance of ndarray expected'):
+        InitialInfo(
+            speed_data=[(1, 2, 3), (4, 5, 6)],
+            start_point=(1, 2),
+            end_point=(2, 3)
+        )
+
+
 def test_invalid_ndim():
     with pytest.raises(ValidationError, match='minimum dimension must be'):
         InitialInfo(
