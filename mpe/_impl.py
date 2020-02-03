@@ -103,7 +103,7 @@ def compute_travel_time(speed_data: np.ndarray,
         return fmm.travel_time(phi, speed_data,
                                dx=parameters.fmm_grid_spacing,
                                order=parameters.fmm_order)
-    except RuntimeError as err:
+    except Exception as err:
         raise ComputeTravelTimeError from err
 
 
