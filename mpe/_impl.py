@@ -2,7 +2,7 @@
 
 import abc
 import itertools
-from typing import Optional, Union, List
+from typing import Optional, Union, List, Type
 
 import numpy as np
 import skfmm as fmm
@@ -34,7 +34,8 @@ from ._exceptions import (
 
 class PathExtractorBase(abc.ABC):
 
-    def __init__(self, travel_time: np.ndarray, parameters: Parameters):
+    def __init__(self, speed_data: np.ndarray, end_point: PointType, parameters: Parameters):
+        travel_time = self.compute_travel_time(speed_data, end_point, parameters)
         grid_coords = [np.arange(n) for n in travel_time.shape]
 
         gradients = np.gradient(travel_time, parameters.extract_grid_spacing)
@@ -51,12 +52,14 @@ class PathExtractorBase(abc.ABC):
             gradient_interpolants.append(interpolant)
 
         self.travel_time = travel_time
+        self.end_point = end_point
         self.gradient_interpolants = gradient_interpolants
         self.grid_spacing = parameters.extract_grid_spacing
         self.max_iterations = parameters.extract_max_iterations
 
-    def __call__(self, start_point: PointType, end_point: PointType) -> np.ndarray:
+    def __call__(self, start_point: PointType) -> np.ndarray:
         end_point_reached = False
+        end_point = self.end_point
         current_point = start_point
         path_points = [current_point]
 
@@ -97,6 +100,22 @@ class PathExtractorBase(abc.ABC):
 
         return np.array(path_points, dtype=np.float_)
 
+    @staticmethod
+    def compute_travel_time(speed_data: np.ndarray,
+                            source_point: PointType,
+                            parameters: Parameters):
+        # define zero contour and set the wave source
+        phi = np.ones_like(speed_data)
+        phi[source_point] = -1
+
+        try:
+            travel_time = fmm.travel_time(phi, speed_data,
+                                          dx=parameters.fmm_grid_spacing,
+                                          order=parameters.fmm_order)
+            return travel_time
+        except Exception as err:
+            raise ComputeTravelTimeError from err
+
     def normalized_velocity(self, point: np.ndarray) -> np.ndarray:
         velocity = np.array([gi(point).item() for gi in self.gradient_interpolants])
         return velocity / np.linalg.norm(velocity)
@@ -136,44 +155,19 @@ path_extraction_methods = {
 }
 
 
-def compute_travel_time(speed_data: np.ndarray,
-                        end_point: PointType,
-                        parameters: Parameters):
-    # define zero contour and set the wave source
-    phi = np.ones_like(speed_data)
-    phi[end_point] = -1
-
-    try:
-        return fmm.travel_time(phi, speed_data,
-                               dx=parameters.fmm_grid_spacing,
-                               order=parameters.fmm_order)
-    except Exception as err:
-        raise ComputeTravelTimeError from err
-
-
-def extract_path(travel_time: np.ndarray,
-                 start_point: PointType,
-                 end_point: PointType,
-                 parameters: Parameters) -> np.ndarray:
-    extract_method = parameters.extract_method
-    extractor = path_extraction_methods[extract_method](travel_time, parameters)
-
-    return extractor(start_point, end_point)
-
-
 def extract_path_without_way_points(init_info: InitialInfo,
                                     parameters: Parameters) -> ResultPathInfo:
-    travel_time = compute_travel_time(
+
+    extractor = path_extraction_methods[parameters.extract_method](
         init_info.speed_data, init_info.end_point, parameters)
 
-    path = extract_path(
-        travel_time, init_info.start_point, init_info.end_point, parameters)
+    path = extractor(init_info.start_point)
 
     path_info = PathInfo(
         path=path,
         start_point=init_info.start_point,
         end_point=init_info.end_point,
-        travel_time=travel_time,
+        travel_time=extractor.travel_time,
         reversed=False,
     )
 
@@ -200,40 +194,42 @@ def extract_path_with_way_points(init_info: InitialInfo,
     speed_data = init_info.speed_data
     path_pieces_info = []
 
+    extractor_cls: Type[PathExtractorBase] = path_extraction_methods[parameters.extract_method]
+
     if parameters.travel_time_cache:
         compute_ttime = [True, False]
-        last_travel_time = None
+        last_extractor = None
 
         for (start_point, end_point), compute_tt in zip(
                 init_info.point_intervals(), itertools.cycle(compute_ttime)):
             if compute_tt:
-                travel_time = compute_travel_time(speed_data, end_point, parameters)
-                last_travel_time = travel_time
+                extractor = extractor_cls(speed_data, end_point, parameters)
+                last_extractor = extractor
                 is_reversed = False
             else:
-                travel_time = last_travel_time
+                extractor = last_extractor
                 start_point, end_point = end_point, start_point
                 is_reversed = True
 
-            path = extract_path(travel_time, start_point, end_point, parameters)
+            path = extractor(start_point)
 
             path_pieces_info.append(PathInfo(
                 path=path,
                 start_point=start_point,
                 end_point=end_point,
-                travel_time=travel_time,
+                travel_time=extractor.travel_time,
                 reversed=is_reversed
             ))
     else:
         for start_point, end_point in init_info.point_intervals():
-            travel_time = compute_travel_time(speed_data, end_point, parameters)
-            path = extract_path(travel_time, start_point, end_point, parameters)
+            extractor = extractor_cls(speed_data, end_point, parameters)
+            path = extractor(start_point)
 
             path_pieces_info.append(PathInfo(
                 path=path,
                 start_point=start_point,
                 end_point=end_point,
-                travel_time=travel_time,
+                travel_time=extractor.travel_time,
                 reversed=False
             ))
 
