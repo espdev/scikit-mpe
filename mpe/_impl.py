@@ -14,7 +14,7 @@ from ._base import mpe as mpe_impl_dispatch
 from ._base import (
     PointType,
     FloatPointType,
-    WayPointsType,
+    PointSequenceType,
     InitialInfo,
     PathInfo,
     ResultPathInfo,
@@ -244,9 +244,9 @@ def extract_path_with_way_points(init_info: InitialInfo,
 
 @mpe_impl_dispatch.register(np.ndarray)
 def mpe(speed_data: np.ndarray, *,
-        start_point: PointType,
-        end_point: PointType,
-        way_points: WayPointsType = (),
+        start_point: Union[PointType, np.ndarray],
+        end_point: Union[PointType, np.ndarray],
+        way_points: Union[PointSequenceType, np.ndarray] = (),
         parameters: Optional[Parameters] = None) -> ResultPathInfo:
 
     init_info = InitialInfo(

@@ -2,7 +2,7 @@
 
 import collections
 import logging
-from typing import Optional, Tuple, Sequence, List, NamedTuple, overload, TYPE_CHECKING
+from typing import Optional, Union, Tuple, Sequence, List, NamedTuple, overload, TYPE_CHECKING
 
 from pydantic import BaseModel, Extra, validator, root_validator
 import numpy as np
@@ -15,9 +15,10 @@ if TYPE_CHECKING:
 
 PointType = Sequence[int]
 FloatPointType = Sequence[float]
-WayPointsType = Sequence[PointType]
-PointTypeModel = Tuple[int, ...]
-WayPointsTypeModel = Tuple[PointTypeModel, ...]
+PointSequenceType = Sequence[PointType]
+
+InitialPointType = Tuple[int, ...]
+InitialWayPointsType = Tuple[InitialPointType, ...]
 
 
 MPE_MODULE = 'mpe'
@@ -45,9 +46,13 @@ class InitialInfo(ImmutableDataObject):
 
     speed_data: np.ndarray
 
-    start_point: PointTypeModel
-    end_point: PointTypeModel
-    way_points: WayPointsTypeModel = ()
+    start_point: InitialPointType
+    end_point: InitialPointType
+    way_points: InitialWayPointsType = ()
+
+    @validator('start_point', 'end_point', 'way_points', pre=True)
+    def _to_canonical(cls, v):
+        return np.asarray(v).tolist()
 
     @root_validator
     def _check_ndim(cls, values):
@@ -163,9 +168,9 @@ class ResultPathInfo(ImmutableDataObject):
 
 @overload
 def mpe(speed_data: np.ndarray, *,
-        start_point: PointType,
-        end_point: PointType,
-        way_points: WayPointsType = (),
+        start_point: Union[PointType, np.ndarray],
+        end_point: Union[PointType, np.ndarray],
+        way_points: Union[PointSequenceType, np.ndarray] = (),
         parameters: Optional['Parameters'] = None) -> ResultPathInfo:
     pass  # pragma: no cover
 
