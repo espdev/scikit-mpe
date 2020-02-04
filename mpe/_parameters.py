@@ -37,7 +37,6 @@ class Parameters(ImmutableDataObject):
 _default_parameters = Parameters()
 
 
-@set_module(MPE_MODULE)
 @contextlib.contextmanager
 def parameters(**kwargs):
     """Context manager for using specified parameters
