@@ -28,10 +28,10 @@ class Parameters(ImmutableDataObject):
 
     fmm_grid_spacing: confloat(strict=True, gt=0.0) = 1.0
     fmm_order: FastMarchingMethodOrder = FastMarchingMethodOrder.first
+    travel_time_cache: bool = False
+    extract_method: PathExtractionMethod = PathExtractionMethod.runge_kutta
     extract_grid_spacing: confloat(strict=True, gt=0.0) = 1.0
     extract_max_iterations: conint(strict=True, ge=100) = 2000
-    extract_method: PathExtractionMethod = PathExtractionMethod.runge_kutta
-    travel_time_cache: bool = False
 
 
 _default_parameters = Parameters()
