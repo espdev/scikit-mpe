@@ -9,7 +9,7 @@ from skimage.filters import sato
 
 
 @pytest.fixture(scope='session')
-def speed_image_retina():
+def retina_speed_image():
     image_data = rescale(rgb2gray(retina())[260:1280, 90:800], 0.5)
     speed_data = sato(image_data)
     return speed_data
