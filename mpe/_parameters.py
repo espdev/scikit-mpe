@@ -20,11 +20,11 @@ class Parameters(ImmutableDataObject):
     """MPE algorithm parameters
     """
 
-    travel_time_spacing: confloat(strict=True, gt=0.0) = 1.0
+    travel_time_spacing: confloat(gt=0.0) = 1.0
     travel_time_order: TravelTimeOrder = TravelTimeOrder.first
     travel_time_cache: bool = False
-    integrate_time_bound: confloat(strict=True, gt=0.0) = 2000.0
-    integrate_max_step: confloat(strict=True, gt=0.0) = 4.0
+    integrate_time_bound: confloat(gt=0.0) = 10000.0
+    integrate_max_step: confloat(gt=0.0) = 4.0
 
 
 _default_parameters = Parameters()
