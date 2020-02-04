@@ -18,6 +18,6 @@ def tets_immutable():
 
 
 def test_context():
-    with parameters(fmm_spacing=2.0):
+    with parameters(travel_time_spacing=2.0):
         assert default_parameters().travel_time_spacing == pytest.approx(2.0)
     assert default_parameters().travel_time_spacing == pytest.approx(1.0)
