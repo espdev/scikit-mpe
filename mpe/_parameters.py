@@ -62,7 +62,7 @@ def parameters(**kwargs):
     _default_parameters = Parameters(**kwargs)
 
     try:
-        yield
+        yield _default_parameters
     finally:
         _default_parameters = prev_default_parameters
 
