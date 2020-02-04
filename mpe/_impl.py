@@ -32,13 +32,44 @@ from ._exceptions import (
 )
 
 
-class PathExtractorBase(abc.ABC):
+class FmmPathExtractorBase(abc.ABC):
 
-    def __init__(self, speed_data: np.ndarray, end_point: PointType, parameters: Parameters):
-        travel_time = self.compute_travel_time(speed_data, end_point, parameters)
-        grid_coords = [np.arange(n) for n in travel_time.shape]
+    def __init__(self, speed_data: np.ndarray, source_point: PointType, parameters: Parameters) -> None:
+        travel_time = self.compute_travel_time(speed_data, source_point, parameters)
 
-        gradients = np.gradient(travel_time, parameters.extract_grid_spacing)
+        self.speed_data = speed_data
+        self.travel_time = travel_time
+        self.source_point = source_point
+
+    @staticmethod
+    def compute_travel_time(speed_data: np.ndarray,
+                            source_point: PointType,
+                            parameters: Parameters):
+        # define zero contour and set the wave source
+        phi = np.ones_like(speed_data)
+        phi[source_point] = -1
+
+        try:
+            travel_time = fmm.travel_time(phi, speed_data,
+                                          dx=parameters.fmm_grid_spacing,
+                                          order=parameters.fmm_order)
+            return travel_time
+        except Exception as err:
+            raise ComputeTravelTimeError from err
+
+    @abc.abstractmethod
+    def __call__(self, start_point: PointType) -> np.ndarray:
+        pass
+
+
+class NaivePathExtractorBase(FmmPathExtractorBase):
+
+    def __init__(self, speed_data: np.ndarray, source_point: PointType, parameters: Parameters):
+        super().__init__(speed_data, source_point, parameters)
+
+        grid_coords = [np.arange(n) for n in speed_data.shape]
+
+        gradients = np.gradient(self.travel_time, parameters.extract_grid_spacing)
         gradient_interpolants = []
 
         for gradient in gradients:
@@ -51,15 +82,13 @@ class PathExtractorBase(abc.ABC):
 
             gradient_interpolants.append(interpolant)
 
-        self.travel_time = travel_time
-        self.end_point = end_point
         self.gradient_interpolants = gradient_interpolants
         self.grid_spacing = parameters.extract_grid_spacing
         self.max_iterations = parameters.extract_max_iterations
 
     def __call__(self, start_point: PointType) -> np.ndarray:
+        end_point = self.source_point
         end_point_reached = False
-        end_point = self.end_point
         current_point = start_point
         path_points = [current_point]
 
@@ -100,22 +129,6 @@ class PathExtractorBase(abc.ABC):
 
         return np.array(path_points, dtype=np.float_)
 
-    @staticmethod
-    def compute_travel_time(speed_data: np.ndarray,
-                            source_point: PointType,
-                            parameters: Parameters):
-        # define zero contour and set the wave source
-        phi = np.ones_like(speed_data)
-        phi[source_point] = -1
-
-        try:
-            travel_time = fmm.travel_time(phi, speed_data,
-                                          dx=parameters.fmm_grid_spacing,
-                                          order=parameters.fmm_order)
-            return travel_time
-        except Exception as err:
-            raise ComputeTravelTimeError from err
-
     def normalized_velocity(self, point: np.ndarray) -> np.ndarray:
         velocity = np.array([gi(point).item() for gi in self.gradient_interpolants])
         return velocity / np.linalg.norm(velocity)
@@ -125,7 +138,7 @@ class PathExtractorBase(abc.ABC):
         pass
 
 
-class EulerPathExtractor(PathExtractorBase):
+class EulerPathExtractor(NaivePathExtractorBase):
     """First order method (Euler's method)
     """
 
@@ -133,7 +146,7 @@ class EulerPathExtractor(PathExtractorBase):
         return point - self.normalized_velocity(point) * self.grid_spacing
 
 
-class RungeKuttaPathExtractor(PathExtractorBase):
+class RungeKuttaPathExtractor(NaivePathExtractorBase):
     """Fourth order Runge-Kutta method
     """
 
@@ -194,7 +207,7 @@ def extract_path_with_way_points(init_info: InitialInfo,
     speed_data = init_info.speed_data
     path_pieces_info = []
 
-    extractor_cls: Type[PathExtractorBase] = path_extraction_methods[parameters.extract_method]
+    extractor_cls: Type[FmmPathExtractorBase] = path_extraction_methods[parameters.extract_method]
 
     if parameters.travel_time_cache:
         compute_ttime = [True, False]
