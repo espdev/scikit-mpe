@@ -14,10 +14,10 @@ def test_forbid_extra():
 def tets_immutable():
     p = Parameters()
     with pytest.raises(TypeError):
-        p.fmm_grid_spacing = 2.0
+        p.travel_time_spacing = 2.0
 
 
 def test_context():
-    with parameters(fmm_grid_spacing=2.0):
-        assert default_parameters().fmm_grid_spacing == pytest.approx(2.0)
-    assert default_parameters().fmm_grid_spacing == pytest.approx(1.0)
+    with parameters(fmm_spacing=2.0):
+        assert default_parameters().travel_time_spacing == pytest.approx(2.0)
+    assert default_parameters().travel_time_spacing == pytest.approx(1.0)

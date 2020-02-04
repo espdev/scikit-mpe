@@ -10,15 +10,9 @@ from ._helpers import set_module
 
 
 @set_module(MPE_MODULE)
-class FastMarchingMethodOrder(enum.IntEnum):
+class TravelTimeComputeOrder(enum.IntEnum):
     first = 1
     second = 2
-
-
-@set_module(MPE_MODULE)
-class PathExtractionMethod(str, enum.Enum):
-    euler = 'euler'
-    runge_kutta = 'runge_kutta'
 
 
 @set_module(MPE_MODULE)
@@ -26,12 +20,11 @@ class Parameters(ImmutableDataObject):
     """MPE algorithm parameters
     """
 
-    fmm_grid_spacing: confloat(strict=True, gt=0.0) = 1.0
-    fmm_order: FastMarchingMethodOrder = FastMarchingMethodOrder.first
+    travel_time_spacing: confloat(strict=True, gt=0.0) = 1.0
+    travel_time_order: TravelTimeComputeOrder = TravelTimeComputeOrder.first
     travel_time_cache: bool = False
-    extract_method: PathExtractionMethod = PathExtractionMethod.runge_kutta
-    extract_grid_spacing: confloat(strict=True, gt=0.0) = 1.0
-    extract_max_iterations: conint(strict=True, ge=100) = 2000
+    integrate_time_bound: confloat(strict=True, gt=0.0) = 2000.0
+    integrate_max_step: confloat(strict=True, gt=0.0) = 4.0
 
 
 _default_parameters = Parameters()
@@ -47,9 +40,9 @@ def parameters(**kwargs):
     kwargs : mapping
         The parameters
 
-            - **fmm_grid_spacing** --
-            - **fmm_order** --
-            - **extract_grid_spacing** --
+            - **travel_time_spacing** --
+            - **travel_time_order** --
+            - **gradient_spacing** --
             - **extract_max_iterations** --
             - **extract_method** --
             - **travel_time_cache** --

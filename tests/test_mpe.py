@@ -9,7 +9,7 @@ from mpe import mpe, parameters
 
 
 @pytest.mark.parametrize('start_point, end_point, point_count', [
-    ((37, 255), (484, 300), 752),
+    ((37, 255), (484, 300), 189),
 ])
 def test_extract_without_waypoints(caplog, retina_speed_image, start_point, end_point, point_count):
     caplog.set_level(logging.DEBUG)
@@ -19,8 +19,8 @@ def test_extract_without_waypoints(caplog, retina_speed_image, start_point, end_
 
 
 @pytest.mark.parametrize('start_point, end_point, way_points, ttime_cache, point_count, ttime_count, reversed_count', [
-    ((37, 255), (484, 300), ((172, 112), (236, 98), (420, 153)), True, 785, 2, 2),
-    ((37, 255), (484, 300), ((172, 112), (236, 98), (420, 153)), False, 785, 4, 0),
+    ((37, 255), (484, 300), ((172, 112), (236, 98), (420, 153)), True, 202, 2, 2),
+    ((37, 255), (484, 300), ((172, 112), (236, 98), (420, 153)), False, 201, 4, 0),
 ])
 def test_extract_with_waypoints(caplog, retina_speed_image,
                                 start_point, end_point, way_points, ttime_cache,

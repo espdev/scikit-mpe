@@ -19,7 +19,7 @@ class ComputeTravelTimeError(MPEError):
 
 
 @set_module(MPE_MODULE)
-class ExtractPathError(MPEError):
+class PathExtractionError(MPEError):
     def __init__(self, *args,
                  travel_time: np.ndarray,
                  start_point: PointType,
@@ -32,7 +32,7 @@ class ExtractPathError(MPEError):
 
 
 @set_module(MPE_MODULE)
-class EndPointNotReachedError(ExtractPathError):
+class EndPointNotReachedError(PathExtractionError):
     def __init__(self, *args,
                  travel_time: np.ndarray,
                  start_point: PointType,

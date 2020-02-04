@@ -8,8 +8,7 @@ from ._base import (
 )
 
 from ._parameters import (
-    FastMarchingMethodOrder,
-    PathExtractionMethod,
+    TravelTimeComputeOrder,
     Parameters,
     parameters,
     default_parameters,
@@ -18,12 +17,14 @@ from ._parameters import (
 from ._exceptions import (
     MPEError,
     ComputeTravelTimeError,
-    ExtractPathError,
+    PathExtractionError,
     EndPointNotReachedError,
 )
 
-# register dispatchered implementation
-import mpe._impl as _impl  # noqa
+from ._mpe import MinimalPathExtractorBase, RungeKuttaMinimalPathExtractor
+
+# register dispatchered API
+import mpe._api as _api  # noqa
 
 
 __version__ = '0.1.0'
@@ -33,16 +34,18 @@ __all__ = [
     'PathInfo',
     'ResultPathInfo',
 
-    'FastMarchingMethodOrder',
-    'PathExtractionMethod',
+    'TravelTimeComputeOrder',
     'Parameters',
     'parameters',
     'default_parameters',
 
     'MPEError',
     'ComputeTravelTimeError',
-    'ExtractPathError',
+    'PathExtractionError',
     'EndPointNotReachedError',
+
+    'MinimalPathExtractorBase',
+    'RungeKuttaMinimalPathExtractor',
 
     'mpe',
 ]
