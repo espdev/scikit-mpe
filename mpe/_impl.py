@@ -24,6 +24,7 @@ from ._base import (
 from ._parameters import (
     ExtractPointUpdateMethod,
     Parameters,
+    default_parameters,
 )
 
 from ._exceptions import (
@@ -263,7 +264,7 @@ def mpe(init_info: InitialInfo, *,
         parameters: Optional[Parameters] = None) -> ResultPathInfo:
 
     if parameters is None:
-        parameters = Parameters()
+        parameters = default_parameters()
 
     if init_info.way_points:
         return extract_path_with_way_points(init_info, parameters)

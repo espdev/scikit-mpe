@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import contextlib
 import enum
 
 from pydantic import confloat, conint
@@ -31,3 +32,50 @@ class Parameters(ImmutableDataObject):
     extract_max_iterations: conint(strict=True, ge=100) = 2000
     extract_point_update_method: ExtractPointUpdateMethod = ExtractPointUpdateMethod.runge_kutta
     travel_time_cache: bool = False
+
+
+_default_parameters = Parameters()
+
+
+@set_module(MPE_MODULE)
+@contextlib.contextmanager
+def parameters(**kwargs):
+    """Context manager for using specified parameters
+
+    Parameters
+    ----------
+
+    kwargs : mapping
+        The parameters
+
+            - **fmm_grid_spacing** --
+            - **fmm_order** --
+            - **extract_grid_spacing** --
+            - **extract_max_iterations** --
+            - **extract_point_update_method** --
+            - **travel_time_cache** --
+
+    """
+
+    global _default_parameters
+    prev_default_parameters = _default_parameters
+
+    _default_parameters = Parameters(**kwargs)
+
+    try:
+        yield
+    finally:
+        _default_parameters = prev_default_parameters
+
+
+def default_parameters() -> Parameters:
+    """Returns the default parameters
+
+    Returns
+    -------
+    parameters : Parameters
+        Default parameters
+
+    """
+
+    return _default_parameters

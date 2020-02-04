@@ -11,6 +11,8 @@ from ._parameters import (
     FastMarchingMethodOrder,
     ExtractPointUpdateMethod,
     Parameters,
+    parameters,
+    default_parameters,
 )
 
 from ._exceptions import (
@@ -34,6 +36,8 @@ __all__ = [
     'FastMarchingMethodOrder',
     'ExtractPointUpdateMethod',
     'Parameters',
+    'parameters',
+    'default_parameters',
 
     'MPEError',
     'ComputeTravelTimeError',
