@@ -35,10 +35,11 @@ from ._exceptions import (
 class FmmPathExtractorBase(abc.ABC):
 
     def __init__(self, speed_data: np.ndarray, source_point: PointType, parameters: Parameters) -> None:
-        travel_time = self.compute_travel_time(speed_data, source_point, parameters)
+        travel_time, phi = self.compute_travel_time(speed_data, source_point, parameters)
 
         self.speed_data = speed_data
         self.travel_time = travel_time
+        self.phi = phi
         self.source_point = source_point
 
     @staticmethod
@@ -50,12 +51,12 @@ class FmmPathExtractorBase(abc.ABC):
         phi[source_point] = -1
 
         try:
-            travel_time = fmm.travel_time(phi, speed_data,
-                                          dx=parameters.fmm_grid_spacing,
-                                          order=parameters.fmm_order)
-            return travel_time
+            travel_time = fmm.travel_time(
+                phi, speed_data, dx=parameters.fmm_grid_spacing, order=parameters.fmm_order)
         except Exception as err:
             raise ComputeTravelTimeError from err
+
+        return travel_time, phi
 
     @abc.abstractmethod
     def __call__(self, start_point: PointType) -> np.ndarray:
