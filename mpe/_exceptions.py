@@ -4,17 +4,21 @@ from typing import List
 
 import numpy as np
 
-from ._base import PointType, FloatPointType
+from ._base import PointType, FloatPointType, MPE_MODULE
+from ._helpers import set_module
 
 
+@set_module(MPE_MODULE)
 class MPEError(Exception):
     pass
 
 
+@set_module(MPE_MODULE)
 class ComputeTravelTimeError(MPEError):
     pass
 
 
+@set_module(MPE_MODULE)
 class ExtractPathError(MPEError):
     def __init__(self, *args,
                  travel_time: np.ndarray,
@@ -27,6 +31,7 @@ class ExtractPathError(MPEError):
         self.end_point = end_point
 
 
+@set_module(MPE_MODULE)
 class EndPointNotReachedError(ExtractPathError):
     def __init__(self, *args,
                  travel_time: np.ndarray,
