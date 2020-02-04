@@ -3,14 +3,14 @@
 import contextlib
 import enum
 
-from pydantic import confloat, conint
+from pydantic import confloat
 
 from ._base import MPE_MODULE, ImmutableDataObject
 from ._helpers import set_module
 
 
 @set_module(MPE_MODULE)
-class TravelTimeComputeOrder(enum.IntEnum):
+class TravelTimeOrder(enum.IntEnum):
     first = 1
     second = 2
 
@@ -21,7 +21,7 @@ class Parameters(ImmutableDataObject):
     """
 
     travel_time_spacing: confloat(strict=True, gt=0.0) = 1.0
-    travel_time_order: TravelTimeComputeOrder = TravelTimeComputeOrder.first
+    travel_time_order: TravelTimeOrder = TravelTimeOrder.first
     travel_time_cache: bool = False
     integrate_time_bound: confloat(strict=True, gt=0.0) = 2000.0
     integrate_max_step: confloat(strict=True, gt=0.0) = 4.0

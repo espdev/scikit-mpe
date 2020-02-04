@@ -8,7 +8,7 @@ from ._base import (
 )
 
 from ._parameters import (
-    TravelTimeComputeOrder,
+    TravelTimeOrder,
     Parameters,
     parameters,
     default_parameters,
@@ -34,7 +34,7 @@ __all__ = [
     'PathInfo',
     'ResultPathInfo',
 
-    'TravelTimeComputeOrder',
+    'TravelTimeOrder',
     'Parameters',
     'parameters',
     'default_parameters',
