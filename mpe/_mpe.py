@@ -93,9 +93,10 @@ class RungeKuttaMinimalPathExtractor(MinimalPathExtractorBase):
         super().__init__(speed_data, source_point, parameters)
 
         self.integrate_times = []
-        self.path_travel_times = []
         self.path_points = []
+        self.path_travel_times = []
         self.steps = 0
+        self.func_eval_count = 0
 
     def __call__(self, start_point: PointType) -> np.ndarray:
         gradient_interpolants = self.gradient_interpolants
@@ -132,10 +133,12 @@ class RungeKuttaMinimalPathExtractor(MinimalPathExtractorBase):
 
             t = solver.t
             y = solver.y
+            tt = travel_time_interpolant(y).item()
 
             self.integrate_times.append(t)
-            self.path_travel_times.append(travel_time_interpolant(y).item())
             self.path_points.append(y)
+            self.path_travel_times.append(tt)
+            self.func_eval_count = solver.nfev
 
             dist_to_end = euclidean(y, end_point)
 
