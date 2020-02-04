@@ -13,7 +13,6 @@ from ._base import mpe as mpe_impl_dispatch
 
 from ._base import (
     PointType,
-    FloatPointType,
     PointSequenceType,
     InitialInfo,
     PathInfo,
@@ -22,7 +21,7 @@ from ._base import (
 )
 
 from ._parameters import (
-    ExtractPointUpdateMethod,
+    PathExtractionMethod,
     Parameters,
     default_parameters,
 )
@@ -33,12 +32,12 @@ from ._exceptions import (
 )
 
 
-class PathPointCalculatorBase(abc.ABC):
+class PathExtractorBase(abc.ABC):
 
-    def __init__(self, travel_time: np.ndarray, grid_spacing: float):
+    def __init__(self, travel_time: np.ndarray, parameters: Parameters):
         grid_coords = [np.arange(n) for n in travel_time.shape]
 
-        gradients = np.gradient(travel_time, grid_spacing)
+        gradients = np.gradient(travel_time, parameters.extract_grid_spacing)
         gradient_interpolants = []
 
         for gradient in gradients:
@@ -51,11 +50,52 @@ class PathPointCalculatorBase(abc.ABC):
 
             gradient_interpolants.append(interpolant)
 
+        self.travel_time = travel_time
         self.gradient_interpolants = gradient_interpolants
-        self.grid_spacing = grid_spacing
+        self.grid_spacing = parameters.extract_grid_spacing
+        self.max_iterations = parameters.extract_max_iterations
 
-    def __call__(self, point: Union[PointType, FloatPointType]) -> FloatPointType:
-        return tuple(self.update(np.array(point, dtype=np.float_)))
+    def __call__(self, start_point: PointType, end_point: PointType) -> np.ndarray:
+        end_point_reached = False
+        current_point = start_point
+        path_points = [current_point]
+
+        for i in range(self.max_iterations):
+            # on each iteration we compute the next path point: compute the path curve evolution
+            current_point = self.update(np.asarray(current_point))
+            distance = euclidean(current_point, end_point)
+
+            logger.debug(
+                'iteration %d: current_point=%s, distance=%.2f', i + 1, current_point, distance)
+
+            if distance > self.grid_spacing:
+                path_points.append(current_point)
+            else:
+                path_points.append(end_point)
+                end_point_reached = True
+                logger.debug(
+                    'The minimal path has been extracted in %d iterations', i + 1)
+                break
+
+        if not end_point_reached:
+            last_distance = euclidean(current_point, end_point)
+
+            err_msg = (
+                f'The extracted path from the start point {start_point} '
+                f'did not reach the end point {end_point} in {self.max_iterations} iterations '
+                f'with distance {last_distance}.'
+            )
+
+            raise EndPointNotReachedError(
+                err_msg,
+                travel_time=self.travel_time,
+                start_point=start_point,
+                end_point=end_point,
+                extracted_points=path_points,
+                last_distance=last_distance,
+            )
+
+        return np.array(path_points, dtype=np.float_)
 
     def normalized_velocity(self, point: np.ndarray) -> np.ndarray:
         velocity = np.array([gi(point).item() for gi in self.gradient_interpolants])
@@ -66,7 +106,7 @@ class PathPointCalculatorBase(abc.ABC):
         pass
 
 
-class EulerPathPointCalculator(PathPointCalculatorBase):
+class EulerPathExtractor(PathExtractorBase):
     """First order method (Euler's method)
     """
 
@@ -74,7 +114,7 @@ class EulerPathPointCalculator(PathPointCalculatorBase):
         return point - self.normalized_velocity(point) * self.grid_spacing
 
 
-class RungeKuttaPathPointCalculator(PathPointCalculatorBase):
+class RungeKuttaPathExtractor(PathExtractorBase):
     """Fourth order Runge-Kutta method
     """
 
@@ -90,9 +130,9 @@ class RungeKuttaPathPointCalculator(PathPointCalculatorBase):
         return point - (k1 + 2 * k2 + 2 * k3 + k4) / 6.0
 
 
-point_update_methods = {
-    ExtractPointUpdateMethod.euler: EulerPathPointCalculator,
-    ExtractPointUpdateMethod.runge_kutta: RungeKuttaPathPointCalculator,
+path_extraction_methods = {
+    PathExtractionMethod.euler: EulerPathExtractor,
+    PathExtractionMethod.runge_kutta: RungeKuttaPathExtractor,
 }
 
 
@@ -115,52 +155,10 @@ def extract_path(travel_time: np.ndarray,
                  start_point: PointType,
                  end_point: PointType,
                  parameters: Parameters) -> np.ndarray:
-    point_update_method = parameters.extract_point_update_method
-    grid_spacing = parameters.extract_grid_spacing
-    max_iterations = parameters.extract_max_iterations
+    extract_method = parameters.extract_method
+    extractor = path_extraction_methods[extract_method](travel_time, parameters)
 
-    update = point_update_methods[point_update_method](travel_time, grid_spacing)
-
-    end_point_reached = False
-    current_point = start_point
-    path_points = [current_point]
-
-    for i in range(max_iterations):
-        # on each iteration we compute the next path point: compute the path curve evolution
-        current_point = update(current_point)
-        distance = euclidean(current_point, end_point)
-
-        logger.debug(
-            'iteration %d: current_point=%s, distance=%.2f', i + 1, current_point, distance)
-
-        if distance > grid_spacing:
-            path_points.append(current_point)
-        else:
-            path_points.append(end_point)
-            end_point_reached = True
-            logger.debug(
-                'The minimal path has been extracted in %d iterations', i + 1)
-            break
-
-    if not end_point_reached:
-        last_distance = euclidean(current_point, end_point)
-
-        err_msg = (
-            f'The extracted path from the start point {start_point} '
-            f'did not reach the end point {end_point} in {max_iterations} iterations '
-            f'with distance {last_distance}.'
-        )
-
-        raise EndPointNotReachedError(
-            err_msg,
-            travel_time=travel_time,
-            start_point=start_point,
-            end_point=end_point,
-            extracted_points=path_points,
-            last_distance=last_distance,
-        )
-
-    return np.array(path_points, dtype=np.float_)
+    return extractor(start_point, end_point)
 
 
 def extract_path_without_way_points(init_info: InitialInfo,

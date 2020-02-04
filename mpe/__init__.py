@@ -9,7 +9,7 @@ from ._base import (
 
 from ._parameters import (
     FastMarchingMethodOrder,
-    ExtractPointUpdateMethod,
+    PathExtractionMethod,
     Parameters,
     parameters,
     default_parameters,
@@ -34,7 +34,7 @@ __all__ = [
     'ResultPathInfo',
 
     'FastMarchingMethodOrder',
-    'ExtractPointUpdateMethod',
+    'PathExtractionMethod',
     'Parameters',
     'parameters',
     'default_parameters',
