@@ -150,6 +150,7 @@ class PathInfo(NamedTuple):
     start_point: PointType
     end_point: PointType
     travel_time: np.ndarray
+    path_travel_times: np.ndarray
     reversed: bool
 
 

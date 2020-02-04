@@ -179,6 +179,7 @@ def extract_path_without_way_points(init_info: InitialInfo,
         start_point=init_info.start_point,
         end_point=init_info.end_point,
         travel_time=extractor.travel_time,
+        path_travel_times=np.asarray(extractor.path_travel_times),
         reversed=False,
     )
 
@@ -227,6 +228,7 @@ def extract_path_with_way_points(init_info: InitialInfo,
                 start_point=start_point,
                 end_point=end_point,
                 travel_time=extractor.travel_time,
+                path_travel_times=np.asarray(extractor.path_travel_times),
                 reversed=is_reversed
             ))
     else:
@@ -239,6 +241,7 @@ def extract_path_with_way_points(init_info: InitialInfo,
                 start_point=start_point,
                 end_point=end_point,
                 travel_time=extractor.travel_time,
+                path_travel_times=np.asarray(extractor.path_travel_times),
                 reversed=False
             ))
 
