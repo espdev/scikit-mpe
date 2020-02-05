@@ -18,8 +18,8 @@ from skimage.filters import sato
 
 from skmpe import mpe
 
-
-speed_image = sato(rescale(rgb2gray(retina()), 0.5))
+image = rescale(rgb2gray(retina()), 0.5)
+speed_image = sato(image)
 
 start_point = (76, 388)
 end_point = (611, 442)
@@ -29,7 +29,7 @@ path_info = mpe(speed_image, start_point, end_point, way_points)
 
 px, py = path_info.path[:, 1], path_info.path[:, 0]
 
-plt.imshow(speed_image, cmap='gray')
+plt.imshow(image, cmap='gray')
 plt.plot(px, py, '-r')
 
 plt.plot(*start_point[::-1], 'oy')
@@ -40,4 +40,4 @@ for p in way_points:
 plt.show()
 ```
 
-![retina_vessel_path](https://user-images.githubusercontent.com/1299189/73837796-482a2c00-4823-11ea-9273-3e551f4bbdd7.png)
+![retina_vessel_path](https://user-images.githubusercontent.com/1299189/73838143-0d74c380-4824-11ea-946a-667c8236ed75.png)
