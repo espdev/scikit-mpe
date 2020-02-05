@@ -2,7 +2,7 @@
 
 import pytest
 
-from mpe import mpe
+from skmpe import mpe
 
 
 @pytest.mark.parametrize('args, kwargs', [

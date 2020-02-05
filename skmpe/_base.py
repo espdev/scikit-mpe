@@ -21,7 +21,7 @@ InitialPointType = Tuple[int, ...]
 InitialWayPointsType = Tuple[InitialPointType, ...]
 
 
-MPE_MODULE = 'mpe'
+MPE_MODULE = 'skmpe'
 MIN_NDIM = 2
 
 

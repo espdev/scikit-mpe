@@ -5,7 +5,7 @@ import collections
 
 import pytest
 
-from mpe import mpe, parameters
+from skmpe import mpe, parameters
 
 
 @pytest.mark.parametrize('start_point, end_point, point_count', [

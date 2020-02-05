@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "mpe"
+name = "scikit-mpe"
 version = "0.1.0"
-description = "Minimal path extraction"
+description = "Minimal path extraction using the fast marching method"
 authors = ["Eugene Prilepin <esp.home@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-keywords = ["mpe", "fmm", "minimal-path", "fast-marching"]
+keywords = ["mpe", "fmm", "minimal-path", "fast-marching", "fast-marching-method"]
 
 repository = "https://github.com/espdev/mpe"
 

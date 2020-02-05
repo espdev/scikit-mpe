@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from mpe import Parameters, parameters, default_parameters
+from skmpe import Parameters, parameters, default_parameters
 
 
 def test_forbid_extra():

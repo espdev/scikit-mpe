@@ -24,7 +24,7 @@ from ._exceptions import (
 from ._mpe import MinimalPathExtractor
 
 # register dispatchered API
-import mpe._api as _api  # noqa
+import skmpe._api as _api  # noqa
 
 
 __version__ = '0.1.0'

@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 from pydantic import ValidationError
 
-from mpe import InitialInfo
+from skmpe import InitialInfo
 
 
 @pytest.mark.parametrize('shape, start_point, end_point, way_points', [
