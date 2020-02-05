@@ -1,5 +1,8 @@
 # scikit-mpe
 
+[![Build status](https://travis-ci.org/espdev/scikit-mpe.svg?branch=master)](https://travis-ci.org/espdev/scikit-mpe)
+[![Coverage Status](https://coveralls.io/repos/github/espdev/scikit-mpe/badge.svg?branch=master)](https://coveralls.io/github/espdev/scikit-mpe?branch=master)
+
 **scikit-mpe** is a package for extracting a minimal path in n-dimensional Euclidean space (on regular Cartesian grids) 
 using [the fast marching method](https://math.berkeley.edu/~sethian/2006/Explanations/fast_marching_explain.html).
 
@@ -41,3 +44,8 @@ plt.show()
 ```
 
 ![retina_vessel_path](https://user-images.githubusercontent.com/1299189/73838143-0d74c380-4824-11ea-946a-667c8236ed75.png)
+
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
