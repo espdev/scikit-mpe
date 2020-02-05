@@ -4,20 +4,23 @@ language: python
 matrix:
   include:
     - python: "3.6"
-      env: TOXENV=py36-pytest
-    - python: "3.7"
-      env: TOXENV=py37-pytest-coverage
-    - python: "3.8"
-      env: TOXENV=py38-pytest
+      script:
+        - poetry install -vvv --no-dev --extras tests
+        - poetry run pytest tests/ --color=yes {posargs} -v
 
-    - python: "3.7"
-      env: TOXENV=flake8
+#    - python: "3.7"
+#      env: TOXENV=py37-pytest-coverage
+#    - python: "3.8"
+#      env: TOXENV=py38-pytest
+#
+#    - python: "3.7"
+#      env: TOXENV=flake8
 
 before_install:
   - pip install poetry
 
-install:
-  pip install tox
+#install:
+#  pip install tox
 
-script:
-  tox
+#script:
+#  tox
