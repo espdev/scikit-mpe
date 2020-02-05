@@ -10,7 +10,8 @@ from scipy.interpolate import RegularGridInterpolator
 from scipy.integrate import RK23, RK45, DOP853, Radau, BDF, LSODA
 from scipy.spatial.distance import euclidean
 
-from ._base import PointType, InitialInfo, PathInfo, ResultPathInfo, logger
+from ._base import PointType, InitialInfo, PathInfo, ResultPathInfo, logger, MPE_MODULE
+from ._helpers import set_module
 from ._parameters import Parameters, OdeSolverMethod, default_parameters
 from ._exceptions import ComputeTravelTimeError, PathExtractionError, EndPointNotReachedError
 
@@ -30,6 +31,7 @@ ODE_SOLVER_METHODS = {
 }
 
 
+@set_module(MPE_MODULE)
 class MinimalPathExtractor:
     """Minimal path extractor
 
