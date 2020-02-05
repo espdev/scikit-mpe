@@ -43,8 +43,8 @@ class MinimalPathExtractor:
         if parameters is None:
             parameters = default_parameters()
 
-        travel_time, phi = self.compute_travel_time(speed_data, source_point, parameters)
-        grad_interpolants, tt_interpolant, phi_interpolant = self.compute_interpolants(travel_time, phi, parameters)
+        travel_time, phi = self._compute_travel_time(speed_data, source_point, parameters)
+        grad_interpolants, tt_interpolant, phi_interpolant = self._compute_interpolants(travel_time, phi, parameters)
 
         self.speed_data = speed_data
         self.travel_time = travel_time
@@ -66,9 +66,9 @@ class MinimalPathExtractor:
         self.func_eval_count = 0
 
     @staticmethod
-    def compute_travel_time(speed_data: np.ndarray,
-                            source_point: PointType,
-                            parameters: Parameters):
+    def _compute_travel_time(speed_data: np.ndarray,
+                             source_point: PointType,
+                             parameters: Parameters):
         # define the zero contour and set the wave source
         phi = np.ones_like(speed_data)
         phi[source_point] = -1
@@ -83,7 +83,7 @@ class MinimalPathExtractor:
         return travel_time, phi
 
     @staticmethod
-    def compute_interpolants(travel_time, phi, parameters):
+    def _compute_interpolants(travel_time, phi, parameters):
         grid_coords = [np.arange(n) for n in travel_time.shape]
 
         gradients = np.gradient(travel_time, parameters.travel_time_spacing)
