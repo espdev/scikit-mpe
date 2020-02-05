@@ -37,10 +37,14 @@ class MinimalPathExtractor:
 
     """
 
-    def __init__(self, speed_data: np.ndarray, source_point: PointType, parameters: Parameters) -> None:
+    def __init__(self, speed_data: np.ndarray, source_point: PointType,
+                 parameters: Optional[Parameters] = None) -> None:
+
+        if parameters is None:
+            parameters = default_parameters()
+
         travel_time, phi = self.compute_travel_time(speed_data, source_point, parameters)
-        grad_interpolants, tt_interpolant, phi_interpolant = self.compute_interpolants(
-            travel_time, phi, parameters)
+        grad_interpolants, tt_interpolant, phi_interpolant = self.compute_interpolants(travel_time, phi, parameters)
 
         self.speed_data = speed_data
         self.travel_time = travel_time
@@ -54,6 +58,7 @@ class MinimalPathExtractor:
 
         self.parameters = parameters
 
+        # output after compute ODE solution
         self.integrate_times = []
         self.path_points = []
         self.path_travel_times = []
