@@ -50,6 +50,7 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+.benchmarks/
 
 # Sphinx documentation
 docs/_build/
