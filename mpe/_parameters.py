@@ -16,6 +16,16 @@ class TravelTimeOrder(enum.IntEnum):
 
 
 @set_module(MPE_MODULE)
+class OdeSolverMethod(str, enum.Enum):
+    RK23 = 'RK23'
+    RK45 = 'RK45'
+    DOP853 = 'DOP853'
+    Radau = 'Radau'
+    BDF = 'BDF'
+    LSODA = 'LSODA'
+
+
+@set_module(MPE_MODULE)
 class Parameters(ImmutableDataObject):
     """MPE algorithm parameters
     """
@@ -23,6 +33,7 @@ class Parameters(ImmutableDataObject):
     travel_time_spacing: confloat(gt=0.0) = 1.0
     travel_time_order: TravelTimeOrder = TravelTimeOrder.first
     travel_time_cache: bool = False
+    ode_solver_method: OdeSolverMethod = OdeSolverMethod.RK45
     integrate_time_bound: confloat(gt=0.0) = 10000.0
     integrate_max_step: confloat(gt=0.0) = 4.0
 

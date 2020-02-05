@@ -3,17 +3,15 @@
 import itertools
 from typing import List
 
-import abc
-
 import numpy as np
 import skfmm as fmm
 
 from scipy.interpolate import RegularGridInterpolator
-from scipy.integrate import RK45
+from scipy.integrate import RK23, RK45, DOP853, Radau, BDF, LSODA
 from scipy.spatial.distance import euclidean
 
 from ._base import PointType, InitialInfo, PathInfo, ResultPathInfo, logger
-from ._parameters import Parameters
+from ._parameters import Parameters, OdeSolverMethod
 from ._exceptions import ComputeTravelTimeError, PathExtractionError, EndPointNotReachedError
 
 
@@ -22,8 +20,21 @@ def make_interpolator(coords, values, fill_value: float = 0.0):
         coords, values, method='linear', bounds_error=False, fill_value=fill_value)
 
 
-class MinimalPathExtractorBase(abc.ABC):
-    """Base class for minimal path extractors
+ODE_SOLVER_METHODS = {
+    OdeSolverMethod.RK23: RK23,
+    OdeSolverMethod.RK45: RK45,
+    OdeSolverMethod.DOP853: DOP853,
+    OdeSolverMethod.Radau: Radau,
+    OdeSolverMethod.BDF: BDF,
+    OdeSolverMethod.LSODA: LSODA,
+}
+
+
+class MinimalPathExtractor:
+    """Minimal path extractor
+
+    Minimal path extractor based on Fast marching method and ODE solver.
+
     """
 
     def __init__(self, speed_data: np.ndarray, source_point: PointType, parameters: Parameters) -> None:
@@ -42,6 +53,12 @@ class MinimalPathExtractorBase(abc.ABC):
         self.gradient_interpolants = grad_interpolants
 
         self.parameters = parameters
+
+        self.integrate_times = []
+        self.path_points = []
+        self.path_travel_times = []
+        self.steps = 0
+        self.func_eval_count = 0
 
     @staticmethod
     def compute_travel_time(speed_data: np.ndarray,
@@ -80,34 +97,19 @@ class MinimalPathExtractorBase(abc.ABC):
 
         return gradient_interpolants, tt_interpolant, phi_interpolant
 
-    @abc.abstractmethod
-    def __call__(self, start_point: PointType) -> np.ndarray:
-        pass
-
-
-class RungeKuttaMinimalPathExtractor(MinimalPathExtractorBase):
-    """Minimal path extractor based on Runge-Kutta 5(4) ODE solver
-    """
-
-    def __init__(self, speed_data: np.ndarray, source_point: PointType, parameters: Parameters) -> None:
-        super().__init__(speed_data, source_point, parameters)
-
-        self.integrate_times = []
-        self.path_points = []
-        self.path_travel_times = []
-        self.steps = 0
-        self.func_eval_count = 0
-
     def __call__(self, start_point: PointType) -> np.ndarray:
         gradient_interpolants = self.gradient_interpolants
         travel_time_interpolant = self.travel_time_interpolant
 
-        def func(time: float, point: np.ndarray) -> np.ndarray:  # noqa
+        def right_hand_func(time: float, point: np.ndarray) -> np.ndarray:  # noqa
             velocity = np.array([gi(point).item() for gi in gradient_interpolants])
             return -velocity / np.linalg.norm(velocity)
 
-        solver = RK45(
-            func,
+        solver_cls = ODE_SOLVER_METHODS[self.parameters.ode_solver_method]
+        logger.debug("ODE solver '%s' will be used.", solver_cls.__name__)
+
+        solver = solver_cls(
+            right_hand_func,
             t0=0.0,
             t_bound=self.parameters.integrate_time_bound,
             y0=start_point,
@@ -128,7 +130,7 @@ class RungeKuttaMinimalPathExtractor(MinimalPathExtractorBase):
 
             if solver.status == 'failed':
                 raise PathExtractionError(
-                    f"ODE solver '{type(solver).__name__}' has failed: {message}",
+                    f"ODE solver '{solver_cls.__name__}' has failed: {message}",
                     travel_time=self.travel_time, start_point=start_point, end_point=end_point)
 
             t = solver.t
@@ -171,7 +173,7 @@ class RungeKuttaMinimalPathExtractor(MinimalPathExtractorBase):
 
 def extract_path_without_way_points(init_info: InitialInfo,
                                     parameters: Parameters) -> ResultPathInfo:
-    extractor = RungeKuttaMinimalPathExtractor(init_info.speed_data, init_info.end_point, parameters)
+    extractor = MinimalPathExtractor(init_info.speed_data, init_info.end_point, parameters)
     path = extractor(init_info.start_point)
 
     path_info = PathInfo(
@@ -213,7 +215,7 @@ def extract_path_with_way_points(init_info: InitialInfo,
         for (start_point, end_point), compute_tt in zip(
                 init_info.point_intervals(), itertools.cycle(compute_ttime)):
             if compute_tt:
-                extractor = RungeKuttaMinimalPathExtractor(speed_data, end_point, parameters)
+                extractor = MinimalPathExtractor(speed_data, end_point, parameters)
                 last_extractor = extractor
                 is_reversed = False
             else:
@@ -233,7 +235,7 @@ def extract_path_with_way_points(init_info: InitialInfo,
             ))
     else:
         for start_point, end_point in init_info.point_intervals():
-            extractor = RungeKuttaMinimalPathExtractor(speed_data, end_point, parameters)
+            extractor = MinimalPathExtractor(speed_data, end_point, parameters)
             path = extractor(start_point)
 
             path_pieces_info.append(PathInfo(

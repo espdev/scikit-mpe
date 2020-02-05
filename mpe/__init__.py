@@ -21,7 +21,7 @@ from ._exceptions import (
     EndPointNotReachedError,
 )
 
-from ._mpe import MinimalPathExtractorBase, RungeKuttaMinimalPathExtractor
+from ._mpe import MinimalPathExtractor
 
 # register dispatchered API
 import mpe._api as _api  # noqa
@@ -44,8 +44,6 @@ __all__ = [
     'PathExtractionError',
     'EndPointNotReachedError',
 
-    'MinimalPathExtractorBase',
-    'RungeKuttaMinimalPathExtractor',
-
+    'MinimalPathExtractor',
     'mpe',
 ]
