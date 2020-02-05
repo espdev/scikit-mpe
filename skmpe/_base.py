@@ -10,7 +10,7 @@ import numpy as np
 from ._helpers import set_module, singledispatch
 
 if TYPE_CHECKING:
-    from ._parameters import Parameters
+    from ._parameters import Parameters  # noqa
 
 
 PointType = Sequence[int]

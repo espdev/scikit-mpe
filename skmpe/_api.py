@@ -16,7 +16,7 @@ def mpe(speed_data: np.ndarray,
         end_point: Union[PointType, np.ndarray],
         way_points: Union[PointSequenceType, np.ndarray] = (),
         *,
-        parameters: Optional[Parameters] = None) -> ResultPathInfo:
+        parameters: Optional[Parameters] = None) -> ResultPathInfo:  # noqa
 
     init_info = InitialInfo(
         speed_data=speed_data,
@@ -31,6 +31,5 @@ def mpe(speed_data: np.ndarray,
 @api_dispatch.register(InitialInfo)
 def mpe(init_info: InitialInfo,
         *,
-        parameters: Optional[Parameters] = None) -> ResultPathInfo:
-
+        parameters: Optional[Parameters] = None) -> ResultPathInfo:  # noqa
     return extract_path(init_info, parameters)
