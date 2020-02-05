@@ -33,7 +33,7 @@ ODE_SOLVER_METHODS = {
 class MinimalPathExtractor:
     """Minimal path extractor
 
-    Minimal path extractor based on Fast marching method and ODE solver.
+    Minimal path extractor based on the fast marching method and ODE solver.
 
     """
 
@@ -64,7 +64,7 @@ class MinimalPathExtractor:
     def compute_travel_time(speed_data: np.ndarray,
                             source_point: PointType,
                             parameters: Parameters):
-        # define zero contour and set the wave source
+        # define the zero contour and set the wave source
         phi = np.ones_like(speed_data)
         phi[source_point] = -1
 
@@ -85,10 +85,6 @@ class MinimalPathExtractor:
         gradient_interpolants = []
 
         for gradient in gradients:
-            if isinstance(gradient, np.ma.MaskedArray):
-                # unmasking masked gradient values (we assume the mask is not hard)
-                gradient[gradient.mask] = 0.0
-
             interpolant = make_interpolator(grid_coords, gradient, fill_value=0.0)
             gradient_interpolants.append(interpolant)
 
@@ -103,6 +99,11 @@ class MinimalPathExtractor:
 
         def right_hand_func(time: float, point: np.ndarray) -> np.ndarray:  # noqa
             velocity = np.array([gi(point).item() for gi in gradient_interpolants])
+
+            if np.any(np.isclose(velocity, 0.0)):
+                # zero-velocity most often means masked travel time data
+                return velocity
+
             return -velocity / np.linalg.norm(velocity)
 
         solver_cls = ODE_SOLVER_METHODS[self.parameters.ode_solver_method]
@@ -142,14 +143,16 @@ class MinimalPathExtractor:
             self.path_travel_times.append(tt)
             self.func_eval_count = solver.nfev
 
+            step_size = solver.step_size
             dist_to_end = euclidean(y, end_point)
 
-            logger.debug('t: %.2f, pt: %s, dist: %.2f, msg: "%s"', t, y, dist_to_end, message)
+            logger.debug('step: %d, time: %.2f, point: %s, step: %.2f, nfev: %d, dist: %.2f, message: "%s"',
+                         self.steps, t, y, step_size, solver.nfev, dist_to_end, message)
 
-            if dist_to_end < solver.step_size:
+            if dist_to_end < step_size:
                 logger.debug(
-                    'The minimal path has been extracted in %.2f time (distance to the end point: %.2f',
-                    t, dist_to_end)
+                    'The minimal path has been extracted (time: %.2f, steps: %d, nfev: %d, dist_to_end: %.2f)',
+                    t, self.steps, solver.nfev, dist_to_end)
                 break
 
             if solver.status == 'finished':
