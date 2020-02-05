@@ -10,13 +10,13 @@ from ._parameters import Parameters
 from ._mpe import extract_path
 
 
-@api_dispatch.register(np.ndarray)
+@api_dispatch.register(np.ndarray)  # noqa
 def mpe(speed_data: np.ndarray,
         start_point: Union[PointType, np.ndarray],
         end_point: Union[PointType, np.ndarray],
         way_points: Union[PointSequenceType, np.ndarray] = (),
         *,
-        parameters: Optional[Parameters] = None) -> ResultPathInfo:  # noqa
+        parameters: Optional[Parameters] = None) -> ResultPathInfo:
 
     init_info = InitialInfo(
         speed_data=speed_data,
@@ -28,8 +28,8 @@ def mpe(speed_data: np.ndarray,
     return mpe(init_info, parameters=parameters)
 
 
-@api_dispatch.register(InitialInfo)
+@api_dispatch.register(InitialInfo)  # noqa
 def mpe(init_info: InitialInfo,
         *,
-        parameters: Optional[Parameters] = None) -> ResultPathInfo:  # noqa
+        parameters: Optional[Parameters] = None) -> ResultPathInfo:
     return extract_path(init_info, parameters)
