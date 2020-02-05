@@ -134,7 +134,7 @@ class MinimalPathExtractor:
             self.steps += 1
             message = solver.step()
 
-            if solver.status == 'failed':
+            if solver.status == 'failed':  # pragma: no cover
                 raise PathExtractionError(
                     f"ODE solver '{solver_cls.__name__}' has failed: {message}",
                     travel_time=self.travel_time, start_point=start_point, end_point=end_point)
