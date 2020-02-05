@@ -9,6 +9,7 @@ from mpe import mpe, parameters
 
 
 @pytest.mark.parametrize('start_point, end_point, point_count', [
+    ((37, 255), (172, 112), 81),
     ((37, 255), (484, 300), 189),
 ])
 def test_extract_without_waypoints(caplog, retina_speed_image, start_point, end_point, point_count):
