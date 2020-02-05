@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import itertools
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 import skfmm as fmm
@@ -11,7 +11,7 @@ from scipy.integrate import RK23, RK45, DOP853, Radau, BDF, LSODA
 from scipy.spatial.distance import euclidean
 
 from ._base import PointType, InitialInfo, PathInfo, ResultPathInfo, logger
-from ._parameters import Parameters, OdeSolverMethod
+from ._parameters import Parameters, OdeSolverMethod, default_parameters
 from ._exceptions import ComputeTravelTimeError, PathExtractionError, EndPointNotReachedError
 
 
@@ -251,3 +251,15 @@ def extract_path_with_way_points(init_info: InitialInfo,
             ))
 
     return make_whole_path_from_pieces(path_pieces_info)
+
+
+def extract_path(init_info: InitialInfo,
+                 parameters: Optional[Parameters] = None) -> ResultPathInfo:
+
+    if parameters is None:
+        parameters = default_parameters()
+
+    if init_info.way_points:
+        return extract_path_with_way_points(init_info, parameters)
+    else:
+        return extract_path_without_way_points(init_info, parameters)
