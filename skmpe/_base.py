@@ -168,16 +168,18 @@ class ResultPathInfo(ImmutableDataObject):
 
 
 @overload
-def mpe(speed_data: np.ndarray, *,
+def mpe(speed_data: np.ndarray,
         start_point: Union[PointType, np.ndarray],
         end_point: Union[PointType, np.ndarray],
         way_points: Union[PointSequenceType, np.ndarray] = (),
+        *,
         parameters: Optional['Parameters'] = None) -> ResultPathInfo:
     pass  # pragma: no cover
 
 
 @overload
-def mpe(init_info: InitialInfo, *,
+def mpe(init_info: InitialInfo,
+        *,
         parameters: Optional['Parameters'] = None) -> ResultPathInfo:
     pass  # pragma: no cover
 
