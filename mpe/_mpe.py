@@ -86,7 +86,7 @@ class MinimalPathExtractorBase(abc.ABC):
 
 
 class RungeKuttaMinimalPathExtractor(MinimalPathExtractorBase):
-    """Minimal path extractor based on Runge-Kutta 4(5) ODE solver
+    """Minimal path extractor based on Runge-Kutta 5(4) ODE solver
     """
 
     def __init__(self, speed_data: np.ndarray, source_point: PointType, parameters: Parameters) -> None:
