@@ -3,7 +3,7 @@
 import contextlib
 import enum
 
-from pydantic import confloat
+from pydantic import confloat, validator
 
 from ._base import MPE_MODULE, ImmutableDataObject
 from ._helpers import set_module
@@ -37,6 +37,15 @@ class Parameters(ImmutableDataObject):
     integrate_time_bound: confloat(gt=0.0) = 10000.0
     integrate_max_step: confloat(gt=0.0) = 4.0
 
+    @validator('travel_time_order')
+    def _check_travel_time_order(cls, v):
+        if v == TravelTimeOrder.second:
+            raise ValueError(
+                'Currently the second order for computing travel time does not work properly.'
+                '\nSee the following issue for details: https://github.com/scikit-fmm/scikit-fmm/issues/28'
+            )
+        return v
+
 
 _default_parameters = Parameters()
 
@@ -53,10 +62,10 @@ def parameters(**kwargs):
 
             - **travel_time_spacing** --
             - **travel_time_order** --
-            - **gradient_spacing** --
-            - **extract_max_iterations** --
-            - **extract_method** --
             - **travel_time_cache** --
+            - **ode_solver_method** --
+            - **integrate_time_bound** --
+            - **integrate_max_step** --
 
     """
 

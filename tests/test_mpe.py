@@ -8,11 +8,17 @@ import pytest
 from skmpe import mpe, parameters, EndPointNotReachedError
 
 
+travel_time_order_param = pytest.mark.parametrize('travel_time_order', [
+    pytest.param(1),
+    pytest.param(2, marks=pytest.mark.skip('https://github.com/scikit-fmm/scikit-fmm/issues/28')),
+])
+
+
 @pytest.mark.parametrize('start_point, end_point, point_count', [
     ((37, 255), (172, 112), 79),
     ((37, 255), (484, 300), 189),
 ])
-@pytest.mark.parametrize('travel_time_order', [1, 2])
+@travel_time_order_param
 def test_extract_without_waypoints(caplog, retina_speed_image, travel_time_order, start_point, end_point, point_count):
     caplog.set_level(logging.DEBUG)
 
@@ -26,7 +32,7 @@ def test_extract_without_waypoints(caplog, retina_speed_image, travel_time_order
     ((37, 255), (484, 300), ((172, 112), (236, 98), (420, 153)), True, 200, 2, 2),
     ((37, 255), (484, 300), ((172, 112), (236, 98), (420, 153)), False, 199, 4, 0),
 ])
-@pytest.mark.parametrize('travel_time_order', [1, 2])
+@travel_time_order_param
 def test_extract_with_waypoints(caplog, retina_speed_image, travel_time_order,
                                 start_point, end_point, way_points, ttime_cache,
                                 point_count, ttime_count, reversed_count):
