@@ -59,7 +59,7 @@ plt.show()
 
 ## Documentation
 
-The full documentation can be found at https://scikit-mpe.readthedocs.io/en/latest
+The full documentation can be found at [scikit-mpe.readthedocs.io](https://scikit-mpe.readthedocs.io/en/latest)
 
 (The documentation is being written)
 
