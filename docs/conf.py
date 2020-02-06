@@ -13,27 +13,31 @@
 import sys
 import pathlib
 import toml
+import re
 
 ROOT_PATH = pathlib.Path(__file__).parent.parent
 
 sys.path.insert(0, str(ROOT_PATH))
 
 
-def get_version():
-    pyprojecttoml = ROOT_PATH / 'pyproject.toml'
-    with pyprojecttoml.open() as fp:
-        config = toml.load(fp)
-    return config['tool']['poetry']['version']
+with (ROOT_PATH / 'pyproject.toml').open() as fp:
+    pyproject_toml = toml.load(fp)
+
+
+def get_author():
+    authors = pyproject_toml['tool']['poetry']['authors']
+    return re.sub(r'<.+>', '', authors[0]).strip()
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'scikit-mpe'
-copyright = '2020, Eugene Prilepin'
-author = 'Eugene Prilepin'
+project = pyproject_toml['tool']['poetry']['name']
+author = get_author()
+copyright = f'2020, {author}'
 
 # The full version, including alpha/beta/rc tags
-release = get_version()
+version = pyproject_toml['tool']['poetry']['version']
+release = pyproject_toml['tool']['poetry']['version']
 
 
 # -- General configuration ---------------------------------------------------
