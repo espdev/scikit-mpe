@@ -136,7 +136,6 @@ class MinimalPathExtractor:
         self.path_points = []
         self.steps = 0
 
-        min_step = self.parameters.integrate_min_step
         end_point = self.source_point
         dist_tol = self.parameters.dist_tol
 
