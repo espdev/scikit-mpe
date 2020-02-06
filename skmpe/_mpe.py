@@ -43,11 +43,13 @@ class MinimalPathExtractor:
     def __init__(self, speed_data: np.ndarray, source_point: PointType,
                  parameters: Optional[Parameters] = None) -> None:
 
-        if parameters is None:
+        if parameters is None:  # pragma: no cover
             parameters = default_parameters()
 
         travel_time, phi = self._compute_travel_time(speed_data, source_point, parameters)
-        grad_interpolants, tt_interpolant, phi_interpolant = self._compute_interpolants(travel_time, phi, parameters)
+        gradients = np.gradient(travel_time, parameters.travel_time_spacing)
+
+        grad_interpolants, tt_interpolant, phi_interpolant = self._compute_interpolants(gradients, travel_time, phi)
 
         self.speed_data = speed_data
         self.travel_time = travel_time
@@ -80,18 +82,16 @@ class MinimalPathExtractor:
             travel_time = fmm.travel_time(phi, speed_data,
                                           dx=parameters.travel_time_spacing,
                                           order=parameters.travel_time_order)
-        except Exception as err:
+        except Exception as err:  # pragma: no cover
             raise ComputeTravelTimeError from err
 
         return travel_time, phi
 
     @staticmethod
-    def _compute_interpolants(travel_time, phi, parameters):
+    def _compute_interpolants(gradients, travel_time, phi):
         grid_coords = [np.arange(n) for n in travel_time.shape]
 
-        gradients = np.gradient(travel_time, parameters.travel_time_spacing)
         gradient_interpolants = []
-
         for gradient in gradients:
             interpolant = make_interpolator(grid_coords, gradient, fill_value=0.0)
             gradient_interpolants.append(interpolant)
@@ -168,12 +168,6 @@ class MinimalPathExtractor:
                 add_point = False
                 small_dist_steps_left -= 1
 
-            step_size = solver.step_size
-
-            if step_size < min_step:
-                logger.warning('step: %d, step size is less than %.2f, skipping point', self.steps, step_size)
-                add_point = False
-
             if add_point:
                 small_dist_steps_left = self.parameters.max_small_dist_steps
 
@@ -183,6 +177,7 @@ class MinimalPathExtractor:
 
             self.func_eval_count = solver.nfev
 
+            step_size = solver.step_size
             dist_to_end = euclidean(y, end_point)
 
             logger.debug('step: %d, time: %.2f, point: %s, step_size: %.2f, nfev: %d, dist: %.2f, message: "%s"',
