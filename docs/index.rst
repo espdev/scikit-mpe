@@ -8,9 +8,10 @@ using `the fast marching method <https://math.berkeley.edu/~sethian/2006/Explana
 
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
+    :caption: Contents:
 
+    changelog
 
 
 Indices and tables
