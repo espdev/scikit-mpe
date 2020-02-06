@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import itertools
+import warnings
 from typing import List, Optional
 
 import numpy as np
@@ -116,21 +117,31 @@ class MinimalPathExtractor:
         solver_cls = ODE_SOLVER_METHODS[self.parameters.ode_solver_method]
         logger.debug("ODE solver '%s' will be used.", solver_cls.__name__)
 
-        solver = solver_cls(
-            right_hand_func,
-            t0=0.0,
-            t_bound=self.parameters.integrate_time_bound,
-            y0=start_point,
-            max_step=self.parameters.integrate_max_step,
-            first_step=None,
-        )
+        with warnings.catch_warnings():
+            # filter warn "extraneous arguments"
+            warnings.simplefilter('ignore', category=UserWarning)
 
-        end_point = self.source_point
+            solver = solver_cls(
+                right_hand_func,
+                t0=0.0,
+                t_bound=self.parameters.integrate_time_bound,
+                y0=start_point,
+                min_step=self.parameters.integrate_min_step,
+                max_step=self.parameters.integrate_max_step,
+                first_step=None,
+            )
 
         self.integrate_times = []
         self.path_travel_times = []
         self.path_points = []
         self.steps = 0
+
+        min_step = self.parameters.integrate_min_step
+        end_point = self.source_point
+        dist_tol = self.parameters.dist_tol
+
+        y_old = start_point
+        small_dist_steps_left = self.parameters.max_small_dist_steps
 
         while True:
             self.steps += 1
@@ -145,15 +156,36 @@ class MinimalPathExtractor:
             y = solver.y
             tt = travel_time_interpolant(y).item()
 
-            self.integrate_times.append(t)
-            self.path_points.append(y)
-            self.path_travel_times.append(tt)
-            self.func_eval_count = solver.nfev
+            add_point = True
+
+            if solver.y_old is not None:
+                y_old = solver.y_old
+            y_dist = euclidean(y, y_old)
+
+            if y_dist < dist_tol:
+                logger.warning('step: %d, the distance between old and current extracted point (%f) is '
+                               'too small (less than dist_tol=%f)', self.steps, y_dist, dist_tol)
+                add_point = False
+                small_dist_steps_left -= 1
 
             step_size = solver.step_size
+
+            if step_size < min_step:
+                logger.warning('step: %d, step size is less than %.2f, skipping point', self.steps, step_size)
+                add_point = False
+
+            if add_point:
+                small_dist_steps_left = self.parameters.max_small_dist_steps
+
+                self.integrate_times.append(t)
+                self.path_points.append(y)
+                self.path_travel_times.append(tt)
+
+            self.func_eval_count = solver.nfev
+
             dist_to_end = euclidean(y, end_point)
 
-            logger.debug('step: %d, time: %.2f, point: %s, step: %.2f, nfev: %d, dist: %.2f, message: "%s"',
+            logger.debug('step: %d, time: %.2f, point: %s, step_size: %.2f, nfev: %d, dist: %.2f, message: "%s"',
                          self.steps, t, y, step_size, solver.nfev, dist_to_end, message)
 
             if dist_to_end < step_size:
@@ -162,11 +194,17 @@ class MinimalPathExtractor:
                     t, self.steps, solver.nfev, dist_to_end)
                 break
 
-            if solver.status == 'finished':
+            if solver.status == 'finished' or small_dist_steps_left == 0:
+                if small_dist_steps_left == 0:
+                    reason = f'the distance between old and current point stay too small ' \
+                             f'for {self.parameters.max_small_dist_steps} steps'
+                else:
+                    reason = f'time bound {self.parameters.integrate_time_bound} is reached, solver was finished.'
+
                 err_msg = (
                     f'The extracted path from the start point {start_point} '
                     f'did not reach the end point {end_point} in {t} time and {self.steps} steps '
-                    f'with distance {dist_to_end:.2f} to the end point.'
+                    f'with distance {dist_to_end:.2f} to the end point. Reason: {reason}'
                 )
 
                 raise EndPointNotReachedError(
@@ -176,6 +214,7 @@ class MinimalPathExtractor:
                     end_point=end_point,
                     extracted_points=self.path_points,
                     last_distance=dist_to_end,
+                    reason=reason,
                 )
 
         return np.array(self.path_points)

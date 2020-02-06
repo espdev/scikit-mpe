@@ -3,7 +3,7 @@
 import contextlib
 import enum
 
-from pydantic import confloat, validator
+from pydantic import confloat, conint, validator
 
 from ._base import MPE_MODULE, ImmutableDataObject
 from ._helpers import set_module
@@ -33,9 +33,15 @@ class Parameters(ImmutableDataObject):
     travel_time_spacing: confloat(gt=0.0) = 1.0
     travel_time_order: TravelTimeOrder = TravelTimeOrder.first
     travel_time_cache: bool = False
+
     ode_solver_method: OdeSolverMethod = OdeSolverMethod.RK45
+
     integrate_time_bound: confloat(gt=0.0) = 10000.0
+    integrate_min_step: confloat(ge=0.0) = 0.0
     integrate_max_step: confloat(gt=0.0) = 4.0
+
+    dist_tol: confloat(ge=0.0) = 1e-3
+    max_small_dist_steps: conint(strict=True, gt=1) = 100
 
     @validator('travel_time_order')
     def _check_travel_time_order(cls, v):
@@ -65,7 +71,9 @@ def parameters(**kwargs):
             - **travel_time_cache** --
             - **ode_solver_method** --
             - **integrate_time_bound** --
-            - **integrate_max_step** --
+            - **integrate_min_step** --
+            - **dist_tol** --
+            - **max_small_dist_steps** --
 
     """
 

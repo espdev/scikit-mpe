@@ -38,8 +38,10 @@ class EndPointNotReachedError(PathExtractionError):
                  start_point: PointType,
                  end_point: PointType,
                  extracted_points: List[FloatPointType],
-                 last_distance: float) -> None:
+                 last_distance: float,
+                 reason: str) -> None:
         super().__init__(*args, travel_time=travel_time, start_point=start_point, end_point=end_point)
 
         self.extracted_points = extracted_points
         self.last_distance = last_distance
+        self.reason = reason
