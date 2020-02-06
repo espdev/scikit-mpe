@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import logging
 import collections
 
 import pytest
+import numpy as np
 
 from skmpe import mpe, parameters, EndPointNotReachedError
 
@@ -19,9 +19,7 @@ travel_time_order_param = pytest.mark.parametrize('travel_time_order', [
     ((37, 255), (484, 300), 189),
 ])
 @travel_time_order_param
-def test_extract_without_waypoints(caplog, retina_speed_image, travel_time_order, start_point, end_point, point_count):
-    caplog.set_level(logging.DEBUG)
-
+def test_extract_without_waypoints(retina_speed_image, travel_time_order, start_point, end_point, point_count):
     with parameters(travel_time_order=travel_time_order):
         path_info = mpe(retina_speed_image, start_point, end_point)
 
@@ -33,11 +31,9 @@ def test_extract_without_waypoints(caplog, retina_speed_image, travel_time_order
     ((37, 255), (484, 300), ((172, 112), (236, 98), (420, 153)), False, 199, 4, 0),
 ])
 @travel_time_order_param
-def test_extract_with_waypoints(caplog, retina_speed_image, travel_time_order,
+def test_extract_with_waypoints(retina_speed_image, travel_time_order,
                                 start_point, end_point, way_points, ttime_cache,
                                 point_count, ttime_count, reversed_count):
-    caplog.set_level(logging.DEBUG)
-
     with parameters(travel_time_order=travel_time_order, travel_time_cache=ttime_cache):
         path_info = mpe(retina_speed_image, start_point, end_point, way_points)
 
@@ -52,8 +48,19 @@ def test_extract_with_waypoints(caplog, retina_speed_image, travel_time_order,
 @pytest.mark.parametrize('start_point, end_point, time_bound', [
     ((37, 255), (484, 300), 500),
 ])
-def test_end_point_not_reached(caplog, retina_speed_image, start_point, end_point, time_bound):
-    caplog.set_level(logging.DEBUG)
+def test_end_point_not_reached(retina_speed_image, start_point, end_point, time_bound):
+    with pytest.raises(EndPointNotReachedError):
+        with parameters(integrate_time_bound=time_bound):
+            mpe(retina_speed_image, start_point, end_point)
+
+
+@pytest.mark.parametrize('start_point, end_point, time_bound, wall', [
+    ((37, 255), (484, 300), 2000.0, (slice(245, 247), slice(0, None))),
+])
+def test_unreachable_end_point(retina_speed_image, start_point, end_point, time_bound, wall):
+    mask = np.zeros_like(retina_speed_image, dtype=np.bool_)
+    mask[wall] = True
+    retina_speed_image = np.ma.masked_array(retina_speed_image, mask=mask)
 
     with pytest.raises(EndPointNotReachedError):
         with parameters(integrate_time_bound=time_bound):
