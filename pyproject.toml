@@ -5,6 +5,7 @@ description = "Minimal path extraction using the fast marching method"
 authors = ["Eugene Prilepin <esp.home@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+include = ["CHANGELOG.md"]
 keywords = ["mpe", "fmm", "minimal-path", "fast-marching", "fast-marching-method"]
 
 classifiers = [
@@ -26,6 +27,7 @@ classifiers = [
 ]
 
 repository = "https://github.com/espdev/mpe"
+documentation = "https://scikit-mpe.readthedocs.io/en/latest"
 
 packages = [
     { include = "skmpe" },
