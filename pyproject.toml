@@ -6,7 +6,7 @@ authors = ["Eugene Prilepin <esp.home@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 include = ["CHANGELOG.md"]
-keywords = ["mpe", "fmm", "minimal-path", "fast-marching", "fast-marching-method"]
+keywords = ["mpe", "fmm", "minimal-path", "fast-marching", "fast-marching-method", "scikit"]
 
 classifiers = [
     "Development Status :: 4 - Beta",
