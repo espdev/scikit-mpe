@@ -14,7 +14,7 @@ API Summary
 
     InitialInfo
     PathInfo
-    ResultPathInfo
+    PathInfoResult
 
     TravelTimeOrder
     OdeSolverMethod
@@ -27,6 +27,7 @@ API Summary
     PathExtractionError
     EndPointNotReachedError
 
+    PathExtractionResult
     MinimalPathExtractor
     mpe
 
@@ -41,11 +42,8 @@ Data and Models
 .. autoclass:: PathInfo
     :show-inheritance:
 
-.. autoclass:: ResultPathInfo
-    :members:
-
-.. autoclass:: ResultPathInfo
-    :members:
+.. autoclass:: PathInfoResult
+    :show-inheritance:
 
 Parameters
 ==========
@@ -88,6 +86,9 @@ Exceptions
 
 Path Extraction
 ===============
+
+.. autoclass:: PathExtractionResult
+    :show-inheritance:
 
 .. autoclass:: MinimalPathExtractor
     :members:

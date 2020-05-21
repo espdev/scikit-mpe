@@ -5,7 +5,7 @@ from typing import Optional, Union
 import numpy as np
 
 from ._base import mpe as api_dispatch
-from ._base import PointType, PointSequenceType, InitialInfo, ResultPathInfo
+from ._base import PointType, PointSequenceType, InitialInfo, PathInfoResult
 from ._parameters import Parameters
 from ._mpe import extract_path
 
@@ -16,7 +16,7 @@ def mpe(speed_data: np.ndarray,
         end_point: Union[PointType, np.ndarray],
         way_points: Union[PointSequenceType, np.ndarray] = (),
         *,
-        parameters: Optional[Parameters] = None) -> ResultPathInfo:
+        parameters: Optional[Parameters] = None) -> PathInfoResult:
 
     init_info = InitialInfo(
         speed_data=speed_data,
@@ -31,5 +31,5 @@ def mpe(speed_data: np.ndarray,
 @api_dispatch.register(InitialInfo)  # noqa
 def mpe(init_info: InitialInfo,
         *,
-        parameters: Optional[Parameters] = None) -> ResultPathInfo:
+        parameters: Optional[Parameters] = None) -> PathInfoResult:
     return extract_path(init_info, parameters)

@@ -11,7 +11,7 @@ from scipy.interpolate import RegularGridInterpolator
 from scipy.integrate import RK23, RK45, DOP853, Radau, BDF, LSODA
 from scipy.spatial.distance import euclidean
 
-from ._base import PointType, InitialInfo, PathInfo, ResultPathInfo, logger, MPE_MODULE
+from ._base import PointType, InitialInfo, PathInfo, PathInfoResult, logger, MPE_MODULE
 from ._helpers import set_module
 from ._parameters import Parameters, OdeSolverMethod, default_parameters
 from ._exceptions import ComputeTravelTimeError, PathExtractionError, EndPointNotReachedError
@@ -324,7 +324,7 @@ class MinimalPathExtractor:
 
 
 def extract_path_without_way_points(init_info: InitialInfo,
-                                    parameters: Parameters) -> ResultPathInfo:
+                                    parameters: Parameters) -> PathInfoResult:
     extractor = MinimalPathExtractor(init_info.speed_data, init_info.end_point, parameters)
     result = extractor(init_info.start_point)
 
@@ -333,14 +333,14 @@ def extract_path_without_way_points(init_info: InitialInfo,
         start_point=init_info.start_point,
         end_point=init_info.end_point,
         travel_time=extractor.travel_time,
-        path_travel_times=np.asarray(result.path_travel_times),
+        extraction_result=result,
         reversed=False,
     )
 
-    return ResultPathInfo(path=path_info.path, pieces=[path_info])
+    return PathInfoResult(path=path_info.path, pieces=[path_info])
 
 
-def make_whole_path_from_pieces(path_pieces_info: List[PathInfo]) -> ResultPathInfo:
+def make_whole_path_from_pieces(path_pieces_info: List[PathInfo]) -> PathInfoResult:
     path_pieces = [path_pieces_info[0].path]
 
     for path_info in path_pieces_info[1:]:
@@ -349,14 +349,14 @@ def make_whole_path_from_pieces(path_pieces_info: List[PathInfo]) -> ResultPathI
             path = np.flipud(path)
         path_pieces.append(path)
 
-    return ResultPathInfo(
+    return PathInfoResult(
         path=np.vstack(path_pieces),
         pieces=path_pieces_info,
     )
 
 
 def extract_path_with_way_points(init_info: InitialInfo,
-                                 parameters: Parameters) -> ResultPathInfo:
+                                 parameters: Parameters) -> PathInfoResult:
     speed_data = init_info.speed_data
     path_pieces_info = []
 
@@ -382,7 +382,7 @@ def extract_path_with_way_points(init_info: InitialInfo,
                 start_point=start_point,
                 end_point=end_point,
                 travel_time=extractor.travel_time,
-                path_travel_times=np.asarray(result.path_travel_times),
+                extraction_result=result,
                 reversed=is_reversed
             ))
     else:
@@ -395,7 +395,7 @@ def extract_path_with_way_points(init_info: InitialInfo,
                 start_point=start_point,
                 end_point=end_point,
                 travel_time=extractor.travel_time,
-                path_travel_times=np.asarray(result.path_travel_times),
+                extraction_result=result,
                 reversed=False
             )
 
@@ -405,7 +405,7 @@ def extract_path_with_way_points(init_info: InitialInfo,
 
 
 def extract_path(init_info: InitialInfo,
-                 parameters: Optional[Parameters] = None) -> ResultPathInfo:
+                 parameters: Optional[Parameters] = None) -> PathInfoResult:
 
     if parameters is None:
         parameters = default_parameters()

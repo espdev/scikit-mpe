@@ -11,6 +11,7 @@ from ._helpers import set_module, singledispatch
 
 if TYPE_CHECKING:
     from ._parameters import Parameters  # noqa
+    from ._mpe import PathExtractionResult  # noqa
 
 
 PointType = Sequence[int]
@@ -181,9 +182,9 @@ class PathInfo(NamedTuple):
 
         The travel time numpy ndarray
 
-    .. py:attribute:: path_travel_times
+    .. py:attribute:: extraction_result
 
-        The travel time values for every path point
+        The path extraction result in :class:`PathExtractionResult` that is returned by :class:`MinimalPathExtractor`
 
     .. py:attribute:: reversed
 
@@ -195,13 +196,13 @@ class PathInfo(NamedTuple):
     start_point: PointType
     end_point: PointType
     travel_time: np.ndarray
-    path_travel_times: np.ndarray
+    extraction_result: 'PathExtractionResult'
     reversed: bool
 
 
 @set_module(MPE_MODULE)
-class ResultPathInfo(ImmutableDataObject):
-    """Result path info model
+class PathInfoResult(NamedTuple):
+    """The named tuple with path info result
 
     .. py:attribute:: path
 
@@ -227,20 +228,20 @@ def mpe(speed_data: np.ndarray,
         end_point: Union[PointType, np.ndarray],
         way_points: Union[PointSequenceType, np.ndarray] = (),
         *,
-        parameters: Optional['Parameters'] = None) -> ResultPathInfo:
+        parameters: Optional['Parameters'] = None) -> PathInfoResult:
     pass  # pragma: no cover
 
 
 @overload
 def mpe(init_info: InitialInfo,
         *,
-        parameters: Optional['Parameters'] = None) -> ResultPathInfo:
+        parameters: Optional['Parameters'] = None) -> PathInfoResult:
     pass  # pragma: no cover
 
 
 @set_module(MPE_MODULE)
 @singledispatch
-def mpe(*args, **kwargs) -> ResultPathInfo:  # noqa
+def mpe(*args, **kwargs) -> PathInfoResult:  # noqa
     """Extracts a minimal path
 
     Usage
@@ -259,7 +260,7 @@ def mpe(*args, **kwargs) -> ResultPathInfo:  # noqa
 
     Returns
     -------
-    path_info : ResultPathInfo
+    path_info : PathInfoResult
         Extracted path info
 
     """

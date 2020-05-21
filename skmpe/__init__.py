@@ -3,7 +3,7 @@
 from ._base import (
     InitialInfo,
     PathInfo,
-    ResultPathInfo,
+    PathInfoResult,
     mpe
 )
 
@@ -36,7 +36,7 @@ __version__ = '0.1.1'
 __all__ = [
     'InitialInfo',
     'PathInfo',
-    'ResultPathInfo',
+    'PathInfoResult',
 
     'TravelTimeOrder',
     'Parameters',
