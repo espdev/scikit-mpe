@@ -5,7 +5,7 @@ import collections
 import pytest
 import numpy as np
 
-from skmpe import mpe, parameters, EndPointNotReachedError
+from skmpe import mpe, parameters, OdeSolverMethod, EndPointNotReachedError
 
 
 travel_time_order_param = pytest.mark.parametrize('travel_time_order', [
@@ -14,13 +14,19 @@ travel_time_order_param = pytest.mark.parametrize('travel_time_order', [
 ])
 
 
-@pytest.mark.parametrize('start_point, end_point, point_count', [
-    ((37, 255), (172, 112), 79),
-    ((37, 255), (484, 300), 189),
+@pytest.mark.parametrize('ode_method, start_point, end_point, point_count', [
+    (OdeSolverMethod.RK23, (37, 255), (172, 112), 82),
+    (OdeSolverMethod.RK45, (37, 255), (172, 112), 79),
+    (OdeSolverMethod.DOP853, (37, 255), (172, 112), 79),
+    (OdeSolverMethod.Radau, (37, 255), (172, 112), 80),
+    (OdeSolverMethod.BDF, (37, 255), (172, 112), 94),
+    (OdeSolverMethod.LSODA, (37, 255), (172, 112), 153),
+
+    (OdeSolverMethod.RK45, (37, 255), (484, 300), 189),
 ])
 @travel_time_order_param
-def test_extract_without_waypoints(retina_speed_image, travel_time_order, start_point, end_point, point_count):
-    with parameters(travel_time_order=travel_time_order):
+def test_extract_path_without_waypoints(retina_speed_image, travel_time_order, ode_method, start_point, end_point, point_count):
+    with parameters(ode_solver_method=ode_method, travel_time_order=travel_time_order):
         path_info = mpe(retina_speed_image, start_point, end_point)
 
     assert path_info.point_count == point_count
@@ -31,9 +37,9 @@ def test_extract_without_waypoints(retina_speed_image, travel_time_order, start_
     ((37, 255), (484, 300), ((172, 112), (236, 98), (420, 153)), False, 199, 4, 0),
 ])
 @travel_time_order_param
-def test_extract_with_waypoints(retina_speed_image, travel_time_order,
-                                start_point, end_point, way_points, ttime_cache,
-                                point_count, ttime_count, reversed_count):
+def test_extract_path_with_waypoints(retina_speed_image, travel_time_order,
+                                     start_point, end_point, way_points, ttime_cache,
+                                     point_count, ttime_count, reversed_count):
     with parameters(travel_time_order=travel_time_order, travel_time_cache=ttime_cache):
         path_info = mpe(retina_speed_image, start_point, end_point, way_points)
 
