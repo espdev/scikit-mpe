@@ -337,7 +337,7 @@ def extract_path_without_way_points(init_info: InitialInfo,
         reversed=False,
     )
 
-    return PathInfoResult(path=path_info.path, pieces=[path_info])
+    return PathInfoResult(path=path_info.path, pieces=(path_info,))
 
 
 def make_whole_path_from_pieces(path_pieces_info: List[PathInfo]) -> PathInfoResult:
