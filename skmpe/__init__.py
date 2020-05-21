@@ -23,7 +23,7 @@ from ._exceptions import (
 )
 
 from ._mpe import (
-    ExtractedPathResult,
+    PathExtractionResult,
     MinimalPathExtractor,
 )
 

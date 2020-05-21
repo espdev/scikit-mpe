@@ -32,10 +32,14 @@ ODE_SOLVER_METHODS = {
 }
 
 
-class ExtractedPathResult(NamedTuple):
+@set_module(MPE_MODULE)
+class PathExtractionResult(NamedTuple):
     """The named tuple with info about extracted path
 
-    The instance of the class is returned from :class:`MinimalPathExtractor`.
+    Notes
+    -----
+
+    The instance of the class is returned from :func:`MinimalPathExtractor.__call__`.
 
     .. py:attribute:: path_points
 
@@ -181,7 +185,7 @@ class MinimalPathExtractor:
 
         return gradient_interpolants, tt_interpolant, phi_interpolant
 
-    def __call__(self, start_point: PointType) -> ExtractedPathResult:
+    def __call__(self, start_point: PointType) -> PathExtractionResult:
         """Extract path from start point to source point (ending point)
 
         Parameters
@@ -191,8 +195,8 @@ class MinimalPathExtractor:
 
         Returns
         -------
-        extracted_path_result : ExtractedPathResult
-            The extracted path result in :class:`ExtractedPathResult`
+        path_extraction_result : PathExtractionResult
+            The path extraction result in :class:`ExtractedPathResult` instance
 
         Raises
         ------
@@ -310,7 +314,7 @@ class MinimalPathExtractor:
                     reason=reason,
                 )
 
-        return ExtractedPathResult(
+        return PathExtractionResult(
             path_points=self._path_points,
             path_integrate_times=self._path_integrate_times,
             path_travel_times=self._path_travel_times,
@@ -386,14 +390,16 @@ def extract_path_with_way_points(init_info: InitialInfo,
             extractor = MinimalPathExtractor(speed_data, end_point, parameters)
             result = extractor(start_point)
 
-            path_pieces_info.append(PathInfo(
+            path_piece_info = PathInfo(
                 path=np.asarray(result.path_points),
                 start_point=start_point,
                 end_point=end_point,
                 travel_time=extractor.travel_time,
                 path_travel_times=np.asarray(result.path_travel_times),
                 reversed=False
-            ))
+            )
+
+            path_pieces_info.append(path_piece_info)
 
     return make_whole_path_from_pieces(path_pieces_info)
 
