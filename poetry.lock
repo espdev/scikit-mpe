@@ -246,7 +246,7 @@ version = "1.1.0"
 setuptools = "*"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Markdown and reStructuredText in a single file."
 name = "m2r"
 optional = false
@@ -289,7 +289,7 @@ python-versions = "*"
 version = "0.6.1"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "The fastest markdown parser in pure Python"
 name = "mistune"
 optional = false
@@ -755,11 +755,11 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools"]
 
 [extras]
-docs = ["sphinx", "numpydoc", "matplotlib", "toml"]
+docs = ["sphinx", "numpydoc", "m2r", "matplotlib", "toml"]
 tests = ["pytest", "pytest-cov", "coveralls", "scikit-image"]
 
 [metadata]
-content-hash = "2bc05496f1f12aa257cc5a2abd8b99d745068a34a4a122a2e6342fedb45a6737"
+content-hash = "727b425dfdaf26d0c296ec88197302c6ac6d8c6ceae7ff3e10bcbe8057057940"
 python-versions = "^3.6"
 
 [metadata.files]

@@ -9,6 +9,7 @@ from ._base import (
 
 from ._parameters import (
     TravelTimeOrder,
+    OdeSolverMethod,
     Parameters,
     parameters,
     default_parameters,

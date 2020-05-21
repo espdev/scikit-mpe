@@ -29,6 +29,7 @@ logger = logging.getLogger(MPE_MODULE)
 logger.addHandler(logging.NullHandler())
 
 
+@set_module(MPE_MODULE)
 class ImmutableDataObject(BaseModel):
     """Base immutable data object with validating fields
     """
@@ -41,7 +42,24 @@ class ImmutableDataObject(BaseModel):
 
 @set_module(MPE_MODULE)
 class InitialInfo(ImmutableDataObject):
-    """Initial info for extracting path
+    """Initial info data model
+
+    .. py:attribute:: speed_data
+
+        Speed data in numpy ndarray
+
+    .. py:attribute:: start_point
+
+        The starting point
+
+    .. py:attribute:: end_point
+
+        The ending point
+
+    .. py:attribute:: way_points
+
+        The tuple of way points
+
     """
 
     speed_data: np.ndarray
@@ -134,16 +152,43 @@ class InitialInfo(ImmutableDataObject):
         return v
 
     def all_points(self) -> List[PointType]:
+        """Returns all initial points"""
         return [self.start_point, *self.way_points, self.end_point]
 
     def point_intervals(self) -> List[Tuple[PointType, PointType]]:
+        """Returns the list of the tuples of initial point intervals"""
         all_points = self.all_points()
         return list(zip(all_points[:-1], all_points[1:]))
 
 
 @set_module(MPE_MODULE)
 class PathInfo(NamedTuple):
-    """Extracted path info
+    """The named tuple with info about extracted path or piece of path
+
+    .. py:attribute:: path
+
+        The path in numpy ndarray
+
+    .. py:attribute:: start_point
+
+        The starting point
+
+    .. py:attribute:: end_point
+
+        The ending point
+
+    .. py:attribute:: travel_time
+
+        The travel time numpy ndarray
+
+    .. py:attribute:: path_travel_times
+
+        The travel time values for every path point
+
+    .. py:attribute:: reversed
+
+        The flag is true if the extracted path is reversed
+
     """
 
     path: np.ndarray
@@ -156,7 +201,15 @@ class PathInfo(NamedTuple):
 
 @set_module(MPE_MODULE)
 class ResultPathInfo(ImmutableDataObject):
-    """Result path info
+    """Result path info model
+
+    .. py:attribute:: path
+
+        Path data in numpy array
+
+    .. py:attribute:: pieces
+
+        The tuple of :class:`PathInfo` for every path piece
     """
 
     path: np.ndarray
@@ -164,6 +217,7 @@ class ResultPathInfo(ImmutableDataObject):
 
     @property
     def point_count(self) -> int:
+        """Returns the number of path points"""
         return self.path.shape[0]
 
 

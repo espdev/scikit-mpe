@@ -11,6 +11,7 @@ using `the fast marching method <https://math.berkeley.edu/~sethian/2006/Explana
     :maxdepth: 2
     :caption: Contents:
 
+    api
     changelog
 
 

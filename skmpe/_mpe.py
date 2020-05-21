@@ -38,6 +38,35 @@ class MinimalPathExtractor:
 
     Minimal path extractor based on the fast marching method and ODE solver.
 
+    Parameters
+    ----------
+
+    speed_data : np.ndarray
+        The speed data (n-d numpy array)
+
+    source_point : Sequence[int]
+        The source point (aka "ending point")
+
+    parameters : class:`Parameters`
+        The parameters
+
+    Examples
+    --------
+
+    .. code-block:: python
+
+        from skmpe import MinimalPathExtractor
+
+        # some function for computing speed data
+        speed_data_2d = compute_speed_data_2d()
+
+        mpe = MinimalPathExtractor(speed_data_2d, (10, 25))
+        path = mpe((123, 34))
+
+    Raises
+    ------
+    ComputeTravelTimeError : Computing travel time has failed
+
     """
 
     def __init__(self, speed_data: np.ndarray, source_point: PointType,
@@ -51,17 +80,16 @@ class MinimalPathExtractor:
 
         grad_interpolants, tt_interpolant, phi_interpolant = self._compute_interpolants(gradients, travel_time, phi)
 
-        self.speed_data = speed_data
-        self.travel_time = travel_time
-        self.phi = phi
+        self._travel_time = travel_time
+        self._phi = phi
 
-        self.source_point = source_point
+        self._source_point = source_point
 
-        self.travel_time_interpolant = tt_interpolant
-        self.phi_interpolant = phi_interpolant
-        self.gradient_interpolants = grad_interpolants
+        self._travel_time_interpolant = tt_interpolant
+        self._phi_interpolant = phi_interpolant
+        self._gradient_interpolants = grad_interpolants
 
-        self.parameters = parameters
+        self._parameters = parameters
 
         # output after compute ODE solution
         self.integrate_times = []
@@ -69,6 +97,24 @@ class MinimalPathExtractor:
         self.path_travel_times = []
         self.steps = 0
         self.func_eval_count = 0
+
+    @property
+    def travel_time(self) -> np.ndarray:
+        """Returns the computed travel time for given speed data
+        """
+        return self._travel_time
+
+    @property
+    def phi(self) -> np.ndarray:
+        """Returns the computed phi (zero contour) for given source point
+        """
+        return self._phi
+
+    @property
+    def parameters(self) -> Parameters:
+        """Returns the parameters
+        """
+        return self._parameters
 
     @staticmethod
     def _compute_travel_time(speed_data: np.ndarray,
@@ -102,8 +148,27 @@ class MinimalPathExtractor:
         return gradient_interpolants, tt_interpolant, phi_interpolant
 
     def __call__(self, start_point: PointType) -> np.ndarray:
-        gradient_interpolants = self.gradient_interpolants
-        travel_time_interpolant = self.travel_time_interpolant
+        """Extract path from start point to source point (ending point)
+
+        Parameters
+        ----------
+        start_point : Sequence[int]
+            The starting point
+
+        Returns
+        -------
+        path : np.ndarray
+            The extracted path
+
+        Raises
+        ------
+        PathExtractionError : Extracting path has failed
+        EndPointNotReachedError : The extracted path is not reached the ending point
+
+        """
+
+        gradient_interpolants = self._gradient_interpolants
+        travel_time_interpolant = self._travel_time_interpolant
 
         def right_hand_func(time: float, point: np.ndarray) -> np.ndarray:  # noqa
             velocity = np.array([gi(point).item() for gi in gradient_interpolants])
@@ -136,7 +201,7 @@ class MinimalPathExtractor:
         self.path_points = []
         self.steps = 0
 
-        end_point = self.source_point
+        end_point = self._source_point
         dist_tol = self.parameters.dist_tol
 
         y_old = start_point
