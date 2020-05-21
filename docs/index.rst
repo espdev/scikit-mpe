@@ -9,8 +9,20 @@ Overview
 **scikit-mpe** is a package for extracting a minimal path in n-dimensional Euclidean space (on regular Cartesian grids)
 using `the fast marching method <https://math.berkeley.edu/~sethian/2006/Explanations/fast_marching_explain.html>`_.
 
+The package can be used in various engineering and image processing tasks.
+For example, it can be used for extracting paths through tubular structures on 2-d and 3-d images,
+or shortest paths on terrain maps.
+
+Installing
+----------
+
+Python 3.6 or above is supported. You can install the package using pip::
+
+    pip install -U scikit-mpe
+
+
 A Simple Example
-~~~~~~~~~~~~~~~~
+----------------
 
 Here is the simple example: how to extract 2-d minimal path using some speed data.
 
@@ -28,9 +40,6 @@ Here is the simple example: how to extract 2-d minimal path using some speed dat
     # Getting the path data in numpy ndarray
     path = path_info.path
 
-
-Installing
-----------
 
 Contents
 --------
