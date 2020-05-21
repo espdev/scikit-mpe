@@ -195,8 +195,8 @@ class MinimalPathExtractor:
 
         Returns
         -------
-        path_extraction_result : PathExtractionResult
-            The path extraction result in :class:`ExtractedPathResult` instance
+        path_extraction_result : :class:`PathExtractionResult`
+            The path extraction result
 
         Raises
         ------
