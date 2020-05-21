@@ -242,6 +242,7 @@ class MinimalPathExtractor:
         end_point = self._source_point
         dist_tol = self.parameters.dist_tol
 
+        y = None
         y_old = start_point
         small_dist_steps_left = self.parameters.max_small_dist_steps
 
@@ -254,14 +255,14 @@ class MinimalPathExtractor:
                     f"ODE solver '{solver_cls.__name__}' has failed: {message}",
                     travel_time=self.travel_time, start_point=start_point, end_point=end_point)
 
-            t = solver.t
+            if y is not None:
+                y_old = y
+
             y = solver.y
+            t = solver.t
             tt = travel_time_interpolant(y).item()
 
             add_point = True
-
-            if solver.y_old is not None:
-                y_old = solver.y_old
             y_dist = euclidean(y, y_old)
 
             if y_dist < dist_tol:
