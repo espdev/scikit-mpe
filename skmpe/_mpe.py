@@ -2,7 +2,7 @@
 
 import itertools
 import warnings
-from typing import List, Optional
+from typing import List, Optional, NamedTuple
 
 import numpy as np
 import skfmm as fmm
@@ -30,6 +30,40 @@ ODE_SOLVER_METHODS = {
     OdeSolverMethod.BDF: BDF,
     OdeSolverMethod.LSODA: LSODA,
 }
+
+
+class ExtractedPathResult(NamedTuple):
+    """The named tuple with info about extracted path
+
+    The instance of the class is returned from :class:`MinimalPathExtractor`.
+
+    .. py:attribute:: path_points
+
+        The extracted path points in the list
+
+    .. py:attribute:: path_integrate_times
+
+        The list of integrate times for every path point
+
+    .. py:attribute:: path_travel_times
+
+        The list of travel time values for every path point
+
+    .. py:attribute:: step_count
+
+        The number of integration steps
+
+    .. py:attribute:: func_eval_count
+
+        The number of evaluations of the right hand function
+
+    """
+
+    path_points: List[PointType]
+    path_integrate_times: List[float]
+    path_travel_times: List[float]
+    step_count: int
+    func_eval_count: int
 
 
 @set_module(MPE_MODULE)
@@ -91,12 +125,12 @@ class MinimalPathExtractor:
 
         self._parameters = parameters
 
-        # output after compute ODE solution
-        self.integrate_times = []
-        self.path_points = []
-        self.path_travel_times = []
-        self.steps = 0
-        self.func_eval_count = 0
+        # the output when computing ODE solution is finished
+        self._path_points = []
+        self._path_integrate_times = []
+        self._path_travel_times = []
+        self._step_count = 0
+        self._func_eval_count = 0
 
     @property
     def travel_time(self) -> np.ndarray:
@@ -147,7 +181,7 @@ class MinimalPathExtractor:
 
         return gradient_interpolants, tt_interpolant, phi_interpolant
 
-    def __call__(self, start_point: PointType) -> np.ndarray:
+    def __call__(self, start_point: PointType) -> ExtractedPathResult:
         """Extract path from start point to source point (ending point)
 
         Parameters
@@ -157,8 +191,8 @@ class MinimalPathExtractor:
 
         Returns
         -------
-        path : np.ndarray
-            The extracted path
+        extracted_path_result : ExtractedPathResult
+            The extracted path result in :class:`ExtractedPathResult`
 
         Raises
         ------
@@ -196,10 +230,10 @@ class MinimalPathExtractor:
                 first_step=None,
             )
 
-        self.integrate_times = []
-        self.path_travel_times = []
-        self.path_points = []
-        self.steps = 0
+        self._path_points = []
+        self._path_integrate_times = []
+        self._path_travel_times = []
+        self._step_count = 0
 
         end_point = self._source_point
         dist_tol = self.parameters.dist_tol
@@ -208,7 +242,7 @@ class MinimalPathExtractor:
         small_dist_steps_left = self.parameters.max_small_dist_steps
 
         while True:
-            self.steps += 1
+            self._step_count += 1
             message = solver.step()
 
             if solver.status == 'failed':  # pragma: no cover
@@ -228,41 +262,41 @@ class MinimalPathExtractor:
 
             if y_dist < dist_tol:
                 logger.warning('step: %d, the distance between old and current extracted point (%f) is '
-                               'too small (less than dist_tol=%f)', self.steps, y_dist, dist_tol)
+                               'too small (less than dist_tol=%f)', self._step_count, y_dist, dist_tol)
                 add_point = False
                 small_dist_steps_left -= 1
 
             if add_point:
                 small_dist_steps_left = self.parameters.max_small_dist_steps
 
-                self.integrate_times.append(t)
-                self.path_points.append(y)
-                self.path_travel_times.append(tt)
+                self._path_points.append(y)
+                self._path_integrate_times.append(t)
+                self._path_travel_times.append(tt)
 
-            self.func_eval_count = solver.nfev
+            self._func_eval_count = solver.nfev
 
             step_size = solver.step_size
             dist_to_end = euclidean(y, end_point)
 
             logger.debug('step: %d, time: %.2f, point: %s, step_size: %.2f, nfev: %d, dist: %.2f, message: "%s"',
-                         self.steps, t, y, step_size, solver.nfev, dist_to_end, message)
+                         self._step_count, t, y, step_size, solver.nfev, dist_to_end, message)
 
             if dist_to_end < step_size:
                 logger.debug(
-                    'The minimal path has been extracted (time: %.2f, steps: %d, nfev: %d, dist_to_end: %.2f)',
-                    t, self.steps, solver.nfev, dist_to_end)
+                    'The minimal path has been extracted (time: %.2f, _step_count: %d, nfev: %d, dist_to_end: %.2f)',
+                    t, self._step_count, solver.nfev, dist_to_end)
                 break
 
             if solver.status == 'finished' or small_dist_steps_left == 0:
                 if small_dist_steps_left == 0:
                     reason = f'the distance between old and current point stay too small ' \
-                             f'for {self.parameters.max_small_dist_steps} steps'
+                             f'for {self.parameters.max_small_dist_steps} _step_count'
                 else:
                     reason = f'time bound {self.parameters.integrate_time_bound} is reached, solver was finished.'
 
                 err_msg = (
                     f'The extracted path from the start point {start_point} '
-                    f'did not reach the end point {end_point} in {t} time and {self.steps} steps '
+                    f'did not reach the end point {end_point} in {t} time and {self._step_count} _step_count '
                     f'with distance {dist_to_end:.2f} to the end point. Reason: {reason}'
                 )
 
@@ -271,29 +305,35 @@ class MinimalPathExtractor:
                     travel_time=self.travel_time,
                     start_point=start_point,
                     end_point=end_point,
-                    extracted_points=self.path_points,
+                    extracted_points=self._path_points,
                     last_distance=dist_to_end,
                     reason=reason,
                 )
 
-        return np.array(self.path_points)
+        return ExtractedPathResult(
+            path_points=self._path_points,
+            path_integrate_times=self._path_integrate_times,
+            path_travel_times=self._path_travel_times,
+            step_count=self._step_count,
+            func_eval_count=self._func_eval_count,
+        )
 
 
 def extract_path_without_way_points(init_info: InitialInfo,
                                     parameters: Parameters) -> ResultPathInfo:
     extractor = MinimalPathExtractor(init_info.speed_data, init_info.end_point, parameters)
-    path = extractor(init_info.start_point)
+    result = extractor(init_info.start_point)
 
     path_info = PathInfo(
-        path=path,
+        path=np.asarray(result.path_points),
         start_point=init_info.start_point,
         end_point=init_info.end_point,
         travel_time=extractor.travel_time,
-        path_travel_times=np.asarray(extractor.path_travel_times),
+        path_travel_times=np.asarray(result.path_travel_times),
         reversed=False,
     )
 
-    return ResultPathInfo(path=path, pieces=[path_info])
+    return ResultPathInfo(path=path_info.path, pieces=[path_info])
 
 
 def make_whole_path_from_pieces(path_pieces_info: List[PathInfo]) -> ResultPathInfo:
@@ -331,27 +371,27 @@ def extract_path_with_way_points(init_info: InitialInfo,
                 start_point, end_point = end_point, start_point
                 is_reversed = True
 
-            path = extractor(start_point)
+            result = extractor(start_point)
 
             path_pieces_info.append(PathInfo(
-                path=path,
+                path=np.asarray(result.path_points),
                 start_point=start_point,
                 end_point=end_point,
                 travel_time=extractor.travel_time,
-                path_travel_times=np.asarray(extractor.path_travel_times),
+                path_travel_times=np.asarray(result.path_travel_times),
                 reversed=is_reversed
             ))
     else:
         for start_point, end_point in init_info.point_intervals():
             extractor = MinimalPathExtractor(speed_data, end_point, parameters)
-            path = extractor(start_point)
+            result = extractor(start_point)
 
             path_pieces_info.append(PathInfo(
-                path=path,
+                path=np.asarray(result.path_points),
                 start_point=start_point,
                 end_point=end_point,
                 travel_time=extractor.travel_time,
-                path_travel_times=np.asarray(extractor.path_travel_times),
+                path_travel_times=np.asarray(result.path_travel_times),
                 reversed=False
             ))
 

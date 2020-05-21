@@ -22,7 +22,10 @@ from ._exceptions import (
     EndPointNotReachedError,
 )
 
-from ._mpe import MinimalPathExtractor
+from ._mpe import (
+    ExtractedPathResult,
+    MinimalPathExtractor,
+)
 
 # register dispatchered API
 import skmpe._api as _api  # noqa
