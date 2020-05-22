@@ -122,7 +122,7 @@ class Parameters(ImmutableDataObject):
     max_small_dist_steps: conint(strict=True, gt=1) = 100
 
     @validator('travel_time_order')
-    def _check_travel_time_order(cls, v):
+    def _check_travel_time_order(cls, v):  # noqa
         if v == TravelTimeOrder.second:
             raise ValueError(
                 'Currently the second order for computing travel time does not work properly.'
