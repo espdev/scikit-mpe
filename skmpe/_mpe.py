@@ -82,8 +82,8 @@ class MinimalPathExtractor:
     speed_data : np.ndarray
         The speed data (n-d numpy array)
 
-    source_point : Sequence[int]
-        The source point (aka "ending point")
+    end_point : Sequence[int]
+        The ending point (a.k.a. "source point")
 
     parameters : class:`Parameters`
         The parameters
@@ -98,7 +98,7 @@ class MinimalPathExtractor:
         # some function for computing speed data
         speed_data_2d = compute_speed_data_2d()
 
-        mpe = MinimalPathExtractor(speed_data_2d, (10, 25))
+        mpe = MinimalPathExtractor(speed_data_2d, end_point=(10, 25))
         path = mpe((123, 34))
 
     Raises
@@ -107,13 +107,13 @@ class MinimalPathExtractor:
 
     """
 
-    def __init__(self, speed_data: np.ndarray, source_point: PointType,
+    def __init__(self, speed_data: np.ndarray, end_point: PointType,
                  parameters: Optional[Parameters] = None) -> None:
 
         if parameters is None:  # pragma: no cover
             parameters = default_parameters()
 
-        travel_time, phi = self._compute_travel_time(speed_data, source_point, parameters)
+        travel_time, phi = self._compute_travel_time(speed_data, end_point, parameters)
         gradients = np.gradient(travel_time, parameters.travel_time_spacing)
 
         grad_interpolants, tt_interpolant, phi_interpolant = self._compute_interpolants(gradients, travel_time, phi)
@@ -121,7 +121,7 @@ class MinimalPathExtractor:
         self._travel_time = travel_time
         self._phi = phi
 
-        self._source_point = source_point
+        self._end_point = end_point
 
         self._travel_time_interpolant = tt_interpolant
         self._phi_interpolant = phi_interpolant
@@ -239,7 +239,7 @@ class MinimalPathExtractor:
         self._path_travel_times = []
         self._step_count = 0
 
-        end_point = self._source_point
+        end_point = self._end_point
         dist_tol = self.parameters.dist_tol
 
         y = None
@@ -352,7 +352,7 @@ def make_whole_path_from_pieces(path_pieces_info: List[PathInfo]) -> PathInfoRes
 
     return PathInfoResult(
         path=np.vstack(path_pieces),
-        pieces=path_pieces_info,
+        pieces=tuple(path_pieces_info),
     )
 
 
