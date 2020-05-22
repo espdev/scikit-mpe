@@ -2,8 +2,10 @@
 
 import contextlib
 import enum
+from typing import Type, Union
 
 from pydantic import confloat, conint, validator
+from scipy.integrate import RK23, RK45, DOP853, Radau, BDF, LSODA
 
 from ._base import mpe_module, ImmutableDataObject
 
@@ -23,17 +25,27 @@ class TravelTimeOrder(enum.IntEnum):
     second = 2
 
 
+SupportedOdeSolvers = Union[RK23, RK45, DOP853, Radau, BDF, LSODA]
+
+
 @mpe_module
 class OdeSolverMethod(str, enum.Enum):
-    """The enumeration of ODE solver methods
+    """The enumeration of supported ODE solver methods
     """
 
-    RK23 = 'RK23'
-    RK45 = 'RK45'
-    DOP853 = 'DOP853'
-    Radau = 'Radau'
-    BDF = 'BDF'
-    LSODA = 'LSODA'
+    RK23 = 'RK23', RK23
+    RK45 = 'RK45', RK45
+    DOP853 = 'DOP853', DOP853
+    Radau = 'Radau', Radau
+    BDF = 'BDF', BDF
+    LSODA = 'LSODA', LSODA
+
+    def __new__(cls, value: str, solver: Type[SupportedOdeSolvers]):
+        obj = str.__new__(cls, value)  # noqa
+        obj._value_ = value
+
+        obj.solver = solver
+        return obj
 
 
 @mpe_module

@@ -8,7 +8,6 @@ import numpy as np
 import skfmm as fmm
 
 from scipy.interpolate import RegularGridInterpolator
-from scipy.integrate import RK23, RK45, DOP853, Radau, BDF, LSODA
 from scipy.spatial.distance import euclidean
 
 from ._base import mpe_module, PointType, InitialInfo, PathInfo, PathInfoResult, logger
@@ -19,16 +18,6 @@ from ._exceptions import ComputeTravelTimeError, PathExtractionError, EndPointNo
 def make_interpolator(coords, values, fill_value: float = 0.0):
     return RegularGridInterpolator(
         coords, values, method='linear', bounds_error=False, fill_value=fill_value)
-
-
-ODE_SOLVER_METHODS = {
-    OdeSolverMethod.RK23: RK23,
-    OdeSolverMethod.RK45: RK45,
-    OdeSolverMethod.DOP853: DOP853,
-    OdeSolverMethod.Radau: Radau,
-    OdeSolverMethod.BDF: BDF,
-    OdeSolverMethod.LSODA: LSODA,
-}
 
 
 @mpe_module
@@ -216,7 +205,7 @@ class MinimalPathExtractor:
 
             return -velocity / np.linalg.norm(velocity)
 
-        solver_cls = ODE_SOLVER_METHODS[self.parameters.ode_solver_method]
+        solver_cls = self.parameters.ode_solver_method.solver
         logger.debug("ODE solver '%s' will be used.", solver_cls.__name__)
 
         with warnings.catch_warnings():
