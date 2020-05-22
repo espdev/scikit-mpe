@@ -110,11 +110,11 @@ class InitialInfo(ImmutableDataObject):
     way_points: InitialWayPointsType = ()
 
     @validator('start_point', 'end_point', 'way_points', pre=True)
-    def _to_canonical(cls, v):
+    def _to_canonical(cls, v):  # noqa
         return np.asarray(v).tolist()
 
     @root_validator
-    def _check_ndim(cls, values):
+    def _check_ndim(cls, values):  # noqa
         speed_data = values.get('speed_data')
 
         start_point = values.get('start_point')
@@ -142,7 +142,7 @@ class InitialInfo(ImmutableDataObject):
         return values
 
     @root_validator
-    def _check_point_duplicates(cls, values):
+    def _check_point_duplicates(cls, values):  # noqa
         start_point = values.get('start_point')
         end_point = values.get('end_point')
         way_points = values.get('way_points')
@@ -160,7 +160,7 @@ class InitialInfo(ImmutableDataObject):
         return values
 
     @validator('start_point', 'end_point', 'way_points')
-    def _check_points(cls, v, field, values):
+    def _check_points(cls, v, field, values):  # noqa
         if v is None:
             return v  # pragma: no cover
 
