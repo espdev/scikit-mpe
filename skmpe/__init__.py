@@ -39,6 +39,7 @@ __all__ = [
     'PathInfoResult',
 
     'TravelTimeOrder',
+    'OdeSolverMethod',
     'Parameters',
     'parameters',
     'default_parameters',
@@ -48,6 +49,7 @@ __all__ = [
     'PathExtractionError',
     'EndPointNotReachedError',
 
+    'PathExtractionResult',
     'MinimalPathExtractor',
     'mpe',
 ]
