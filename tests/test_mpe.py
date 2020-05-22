@@ -8,6 +8,8 @@ import numpy as np
 from skmpe import mpe, parameters, OdeSolverMethod, EndPointNotReachedError
 
 
+TRAVEL_TIME_ABS_TOL = 100
+
 travel_time_order_param = pytest.mark.parametrize('travel_time_order', [
     pytest.param(1),
     pytest.param(2, marks=pytest.mark.skip('https://github.com/scikit-fmm/scikit-fmm/issues/28')),
@@ -31,9 +33,12 @@ def test_extract_path_without_waypoints(retina_speed_image, travel_time_order, o
 
     path_piece_info = path_info.pieces[0]
     start_travel_time = path_piece_info.travel_time[start_point[0], start_point[1]]
+    end_travel_time = path_piece_info.travel_time[end_point[0], end_point[1]]
     path_start_travel_time = path_piece_info.extraction_result.path_travel_times[0]
+    path_end_travel_time = path_piece_info.extraction_result.path_travel_times[-1]
 
-    assert path_start_travel_time == pytest.approx(start_travel_time, abs=50)
+    assert path_start_travel_time == pytest.approx(start_travel_time, abs=TRAVEL_TIME_ABS_TOL)
+    assert path_end_travel_time == pytest.approx(end_travel_time, abs=TRAVEL_TIME_ABS_TOL)
 
 
 @pytest.mark.parametrize('start_point, end_point, way_points, ttime_cache, ttime_count, reversed_count', [
@@ -47,11 +52,17 @@ def test_extract_path_with_waypoints(retina_speed_image, travel_time_order,
     with parameters(travel_time_order=travel_time_order, travel_time_cache=ttime_cache):
         path_info = mpe(retina_speed_image, start_point, end_point, way_points)
 
-    path_piece_info = path_info.pieces[0]
-    start_travel_time = path_piece_info.travel_time[start_point[0], start_point[1]]
-    path_start_travel_time = path_piece_info.extraction_result.path_travel_times[0]
+    for path_piece_info in path_info.pieces:
+        start_pt = path_piece_info.start_point
+        end_pt = path_piece_info.end_point
 
-    assert path_start_travel_time == pytest.approx(start_travel_time, abs=50)
+        start_travel_time = path_piece_info.travel_time[start_pt[0], start_pt[1]]
+        end_travel_time = path_piece_info.travel_time[end_pt[0], end_pt[1]]
+        path_start_travel_time = path_piece_info.extraction_result.path_travel_times[0]
+        path_end_travel_time = path_piece_info.extraction_result.path_travel_times[-1]
+
+        assert path_start_travel_time == pytest.approx(start_travel_time, abs=TRAVEL_TIME_ABS_TOL)
+        assert path_end_travel_time == pytest.approx(end_travel_time, abs=TRAVEL_TIME_ABS_TOL)
 
     ttime_counter = collections.Counter(id(piece.travel_time) for piece in path_info.pieces)
     assert len(ttime_counter) == ttime_count
