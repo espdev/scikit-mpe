@@ -14,36 +14,44 @@ travel_time_order_param = pytest.mark.parametrize('travel_time_order', [
 ])
 
 
-@pytest.mark.parametrize('ode_method, start_point, end_point, point_count', [
-    (OdeSolverMethod.RK23, (37, 255), (172, 112), 82),
-    (OdeSolverMethod.RK45, (37, 255), (172, 112), 79),
-    (OdeSolverMethod.DOP853, (37, 255), (172, 112), 79),
-    (OdeSolverMethod.Radau, (37, 255), (172, 112), 80),
-    (OdeSolverMethod.BDF, (37, 255), (172, 112), 94),
-    (OdeSolverMethod.LSODA, (37, 255), (172, 112), 153),
+@pytest.mark.parametrize('ode_method, start_point, end_point', [
+    (OdeSolverMethod.RK23, (37, 255), (172, 112)),
+    (OdeSolverMethod.RK45, (37, 255), (172, 112)),
+    (OdeSolverMethod.DOP853, (37, 255), (172, 112)),
+    (OdeSolverMethod.Radau, (37, 255), (172, 112)),
+    (OdeSolverMethod.BDF, (37, 255), (172, 112)),
+    (OdeSolverMethod.LSODA, (37, 255), (172, 112)),
 
-    (OdeSolverMethod.RK45, (37, 255), (484, 300), 189),
+    (OdeSolverMethod.RK45, (37, 255), (484, 300)),
 ])
 @travel_time_order_param
-def test_extract_path_without_waypoints(retina_speed_image, travel_time_order, ode_method, start_point, end_point, point_count):
+def test_extract_path_without_waypoints(retina_speed_image, travel_time_order, ode_method, start_point, end_point):
     with parameters(ode_solver_method=ode_method, travel_time_order=travel_time_order):
         path_info = mpe(retina_speed_image, start_point, end_point)
 
-    assert path_info.point_count == point_count
+    path_piece_info = path_info.pieces[0]
+    start_travel_time = path_piece_info.travel_time[start_point[0], start_point[1]]
+    path_start_travel_time = path_piece_info.extraction_result.path_travel_times[0]
+
+    assert path_start_travel_time == pytest.approx(start_travel_time, abs=50)
 
 
-@pytest.mark.parametrize('start_point, end_point, way_points, ttime_cache, point_count, ttime_count, reversed_count', [
-    ((37, 255), (484, 300), ((172, 112), (236, 98), (420, 153)), True, 200, 2, 2),
-    ((37, 255), (484, 300), ((172, 112), (236, 98), (420, 153)), False, 199, 4, 0),
+@pytest.mark.parametrize('start_point, end_point, way_points, ttime_cache, ttime_count, reversed_count', [
+    ((37, 255), (484, 300), ((172, 112), (236, 98), (420, 153)), True, 2, 2),
+    ((37, 255), (484, 300), ((172, 112), (236, 98), (420, 153)), False, 4, 0),
 ])
 @travel_time_order_param
 def test_extract_path_with_waypoints(retina_speed_image, travel_time_order,
                                      start_point, end_point, way_points, ttime_cache,
-                                     point_count, ttime_count, reversed_count):
+                                     ttime_count, reversed_count):
     with parameters(travel_time_order=travel_time_order, travel_time_cache=ttime_cache):
         path_info = mpe(retina_speed_image, start_point, end_point, way_points)
 
-    assert path_info.point_count == point_count
+    path_piece_info = path_info.pieces[0]
+    start_travel_time = path_piece_info.travel_time[start_point[0], start_point[1]]
+    path_start_travel_time = path_piece_info.extraction_result.path_travel_times[0]
+
+    assert path_start_travel_time == pytest.approx(start_travel_time, abs=50)
 
     ttime_counter = collections.Counter(id(piece.travel_time) for piece in path_info.pieces)
     assert len(ttime_counter) == ttime_count
