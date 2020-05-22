@@ -4,21 +4,20 @@ from typing import List
 
 import numpy as np
 
-from ._base import PointType, FloatPointType, MPE_MODULE
-from ._helpers import set_module
+from ._base import mpe_module, PointType, FloatPointType
 
 
-@set_module(MPE_MODULE)
+@mpe_module
 class MPEError(Exception):
     """Base exception class for all MPE errors"""
 
 
-@set_module(MPE_MODULE)
+@mpe_module
 class ComputeTravelTimeError(MPEError):
     """The exception occurs when computing travel time has failed"""
 
 
-@set_module(MPE_MODULE)
+@mpe_module
 class PathExtractionError(MPEError):
     """Base exception class for all extracting path errors"""
 
@@ -48,7 +47,7 @@ class PathExtractionError(MPEError):
         return self._end_point
 
 
-@set_module(MPE_MODULE)
+@mpe_module
 class EndPointNotReachedError(PathExtractionError):
     """The exception occurs when the ending point is not reached"""
 

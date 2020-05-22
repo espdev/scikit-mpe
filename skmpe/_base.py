@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import collections
+import functools
+import inspect
 import logging
-from typing import Optional, Union, Tuple, Sequence, List, NamedTuple, overload, TYPE_CHECKING
+from typing import Tuple, Sequence, List, NamedTuple, TYPE_CHECKING
 
 from pydantic import BaseModel, Extra, validator, root_validator
 import numpy as np
-
-from ._helpers import set_module, singledispatch
 
 if TYPE_CHECKING:
     from ._parameters import Parameters  # noqa
@@ -30,7 +30,47 @@ logger = logging.getLogger(MPE_MODULE)
 logger.addHandler(logging.NullHandler())
 
 
-@set_module(MPE_MODULE)
+def mpe_module(obj):
+    """Replace __module__ for decorated object
+
+    Returns
+    -------
+    obj : Any
+        The object with replaced __module__
+    """
+
+    obj.__module__ = MPE_MODULE
+    return obj
+
+
+def singledispatch(func_stub):
+    """Single dispatch wrapper with default implementation that raises the exception for invalid signatures
+    """
+
+    @functools.wraps(func_stub)
+    @functools.singledispatch
+    def _dispatch(*args, **kwargs):
+        sign_args = ', '.join(f'{type(arg).__name__}' for arg in args)
+        sign_kwargs = ', '.join(f'{kwname}: {type(kwvalue).__name__}' for kwname, kwvalue in kwargs.items())
+        allowed_signs = ''
+        i = 0
+
+        for arg_type, func in _dispatch.registry.items():
+            if arg_type is object:
+                continue
+            i += 1
+            sign = inspect.signature(func)
+            allowed_signs += f'  [{i}] => {sign}\n'
+
+        raise TypeError(
+            f"call '{func_stub.__name__}' with invalid signature:\n"
+            f"  => ({sign_args}, {sign_kwargs})\n\n"
+            f"allowed signatures:\n{allowed_signs}")
+
+    return _dispatch
+
+
+@mpe_module
 class ImmutableDataObject(BaseModel):
     """Base immutable data object with validating fields
     """
@@ -41,7 +81,7 @@ class ImmutableDataObject(BaseModel):
         allow_mutation = False
 
 
-@set_module(MPE_MODULE)
+@mpe_module
 class InitialInfo(ImmutableDataObject):
     """Initial info data model
 
@@ -162,7 +202,7 @@ class InitialInfo(ImmutableDataObject):
         return list(zip(all_points[:-1], all_points[1:]))
 
 
-@set_module(MPE_MODULE)
+@mpe_module
 class PathInfo(NamedTuple):
     """The named tuple with info about extracted path or piece of path
 
@@ -200,7 +240,7 @@ class PathInfo(NamedTuple):
     reversed: bool
 
 
-@set_module(MPE_MODULE)
+@mpe_module
 class PathInfoResult(NamedTuple):
     """The named tuple with path info result
 
@@ -220,47 +260,3 @@ class PathInfoResult(NamedTuple):
     def point_count(self) -> int:
         """Returns the number of path points"""
         return self.path.shape[0]
-
-
-@overload
-def mpe(speed_data: np.ndarray,
-        start_point: Union[PointType, np.ndarray],
-        end_point: Union[PointType, np.ndarray],
-        way_points: Union[PointSequenceType, np.ndarray] = (),
-        *,
-        parameters: Optional['Parameters'] = None) -> PathInfoResult:
-    pass  # pragma: no cover
-
-
-@overload
-def mpe(init_info: InitialInfo,
-        *,
-        parameters: Optional['Parameters'] = None) -> PathInfoResult:
-    pass  # pragma: no cover
-
-
-@set_module(MPE_MODULE)
-@singledispatch
-def mpe(*args, **kwargs) -> PathInfoResult:  # noqa
-    """Extracts a minimal path
-
-    Usage
-    -----
-
-    .. code-block:: python
-
-        mpe(init_info: InitialInfo, *,
-            parameters: Optional[Parameters] = None) -> ResultPathInfo
-
-        mpe(speed_data: np.ndarray, *,
-            start_point: Sequence[int],
-            end_point: Sequence[int],
-            way_points: Sequence[Sequence[int]] = (),
-            parameters: Optional[Parameters] = None) -> ResultPathInfo
-
-    Returns
-    -------
-    path_info : PathInfoResult
-        Extracted path info
-
-    """

@@ -5,11 +5,10 @@ import enum
 
 from pydantic import confloat, conint, validator
 
-from ._base import MPE_MODULE, ImmutableDataObject
-from ._helpers import set_module
+from ._base import mpe_module, ImmutableDataObject
 
 
-@set_module(MPE_MODULE)
+@mpe_module
 class TravelTimeOrder(enum.IntEnum):
     """The enumeration of travel time computation orders
 
@@ -24,7 +23,7 @@ class TravelTimeOrder(enum.IntEnum):
     second = 2
 
 
-@set_module(MPE_MODULE)
+@mpe_module
 class OdeSolverMethod(str, enum.Enum):
     """The enumeration of ODE solver methods
     """
@@ -37,7 +36,7 @@ class OdeSolverMethod(str, enum.Enum):
     LSODA = 'LSODA'
 
 
-@set_module(MPE_MODULE)
+@mpe_module
 class Parameters(ImmutableDataObject):
     """MPE algorithm parameters model
 
@@ -123,6 +122,7 @@ class Parameters(ImmutableDataObject):
 _default_parameters = Parameters()
 
 
+@mpe_module
 @contextlib.contextmanager
 def parameters(**kwargs):
     """Context manager for using specified parameters
@@ -176,6 +176,7 @@ def parameters(**kwargs):
         _default_parameters = prev_default_parameters
 
 
+@mpe_module
 def default_parameters() -> Parameters:
     """Returns the default parameters
 

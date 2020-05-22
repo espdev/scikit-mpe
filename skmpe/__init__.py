@@ -4,7 +4,6 @@ from ._base import (
     InitialInfo,
     PathInfo,
     PathInfoResult,
-    mpe
 )
 
 from ._parameters import (
@@ -27,8 +26,7 @@ from ._mpe import (
     MinimalPathExtractor,
 )
 
-# register dispatchered API
-import skmpe._api as _api  # noqa
+from skmpe._api import mpe
 
 
 __version__ = '0.1.1'

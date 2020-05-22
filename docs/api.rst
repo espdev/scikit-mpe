@@ -93,3 +93,5 @@ Path Extraction
 .. autoclass:: MinimalPathExtractor
     :members:
     :special-members: __call__
+
+.. autofunction:: mpe
