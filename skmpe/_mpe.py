@@ -11,7 +11,7 @@ from scipy.interpolate import RegularGridInterpolator
 from scipy.spatial.distance import euclidean
 
 from ._base import mpe_module, PointType, InitialInfo, PathInfo, PathInfoResult, logger
-from ._parameters import Parameters, OdeSolverMethod, default_parameters
+from ._parameters import Parameters, default_parameters
 from ._exceptions import ComputeTravelTimeError, PathExtractionError, EndPointNotReachedError
 
 
