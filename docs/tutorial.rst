@@ -31,7 +31,7 @@ The algorithm contains two main steps:
       using the `fast marching method <https://en.wikipedia.org/wiki/Fast_marching_method>`_.
     - Second, the minimal path (travel time is minimizing) is extracting from the starting point to the ending point
       using ODE solver (`Runge-Kutta <https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods>`_ for example)
-      for solving the differential equation :math:`x_t = - \nabla_t / | \nabla_t`
+      for solving the differential equation :math:`x_t = - \nabla (t) / | \nabla (t)`
 
 If we have way points we need to perform these two steps for every interval between the starting point, the set of the
 way points and the ending point and concatenate the path pieces to the full path.
@@ -105,7 +105,7 @@ using **scikit-mpe** package and plot it. Also we can plot travel time contours.
     ax.plot(end_point[1], end_point[0], 'o', color=[1, 1, 0])
     tt_c = ax.contour(xx, yy, travel_time, 20, cmap='plasma', linewidths=1.5)
     ax.clabel(tt_c, inline=1, fontsize=9, fmt='%d')
-    ax.set_title('minimal path and travel time contours')
+    ax.set_title('travel time contours and minimal path')
     ax.axis('off')
     cb = fig.colorbar(tt_c)
     cb.ax.set_ylabel('travel time')
