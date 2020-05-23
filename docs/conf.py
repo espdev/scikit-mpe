@@ -65,7 +65,6 @@ numpydoc_show_class_members = False
 plot_apply_rcparams = True
 plot_rcparams = {
     'figure.autolayout': 'True',
-    'figure.figsize': '5, 3.5',
     'savefig.bbox': 'tight',
     'savefig.facecolor': "None",
 }
