@@ -130,6 +130,9 @@ class Parameters(ImmutableDataObject):
             )
         return v
 
+    def __str__(self):
+        return self.__repr_str__('\n')
+
 
 _default_parameters = Parameters()
 
