@@ -61,8 +61,6 @@ plt.show()
 
 The full documentation can be found at [scikit-mpe.readthedocs.io](https://scikit-mpe.readthedocs.io/en/latest)
 
-(The documentation is being written)
-
 ## References
 
 - [Fast Marching Methods: A boundary value formulation](https://math.berkeley.edu/~sethian/2006/Explanations/fast_marching_explain.html)
