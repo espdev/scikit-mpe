@@ -33,7 +33,7 @@ The algorithm contains two main steps:
       using the `fast marching method <https://en.wikipedia.org/wiki/Fast_marching_method>`_.
     - Second, the minimal path (travel time is minimizing) is extracting from the starting point to the ending point
       using ODE solver (`Runge-Kutta <https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods>`_ for example)
-      for solving the differential equation :math:`x_t = - \nabla (t) / | \nabla (t)`
+      for solving the differential equation :math:`x_t = - \nabla (t) / | \nabla (t) |`
 
 If we have way points we need to perform these two steps for every interval between the starting point, the set of the
 way points and the ending point and concatenate the path pieces to the full path.
