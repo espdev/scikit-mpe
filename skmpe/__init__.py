@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 
+from importlib_metadata import metadata, PackageNotFoundError
+
 from ._base import (
     InitialInfo,
     PathInfo,
-    ResultPathInfo,
-    mpe
+    PathInfoResult,
 )
 
 from ._parameters import (
     TravelTimeOrder,
+    OdeSolverMethod,
     Parameters,
     parameters,
     default_parameters,
@@ -21,20 +23,27 @@ from ._exceptions import (
     EndPointNotReachedError,
 )
 
-from ._mpe import MinimalPathExtractor
+from ._mpe import (
+    PathExtractionResult,
+    MinimalPathExtractor,
+)
 
-# register dispatchered API
-import skmpe._api as _api  # noqa
+from skmpe._api import mpe
 
 
-__version__ = '0.1.1'
+try:
+    __version__ = metadata('scikit-mpe')['version']
+except PackageNotFoundError:  # pragma: no cover
+    __version__ = '0.0.0.dev'
+
 
 __all__ = [
     'InitialInfo',
     'PathInfo',
-    'ResultPathInfo',
+    'PathInfoResult',
 
     'TravelTimeOrder',
+    'OdeSolverMethod',
     'Parameters',
     'parameters',
     'default_parameters',
@@ -44,6 +53,7 @@ __all__ = [
     'PathExtractionError',
     'EndPointNotReachedError',
 
+    'PathExtractionResult',
     'MinimalPathExtractor',
     'mpe',
 ]

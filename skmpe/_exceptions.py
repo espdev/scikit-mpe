@@ -4,35 +4,53 @@ from typing import List
 
 import numpy as np
 
-from ._base import PointType, FloatPointType, MPE_MODULE
-from ._helpers import set_module
+from ._base import mpe_module, PointType, FloatPointType
 
 
-@set_module(MPE_MODULE)
+@mpe_module
 class MPEError(Exception):
-    pass
+    """Base exception class for all MPE errors"""
 
 
-@set_module(MPE_MODULE)
+@mpe_module
 class ComputeTravelTimeError(MPEError):
-    pass
+    """The exception occurs when computing travel time has failed"""
 
 
-@set_module(MPE_MODULE)
+@mpe_module
 class PathExtractionError(MPEError):
+    """Base exception class for all extracting path errors"""
+
     def __init__(self, *args,
                  travel_time: np.ndarray,
                  start_point: PointType,
                  end_point: PointType) -> None:
         super().__init__(*args)
 
-        self.travel_time = travel_time
-        self.start_point = start_point
-        self.end_point = end_point
+        self._travel_time = travel_time
+        self._start_point = start_point
+        self._end_point = end_point
+
+    @property
+    def travel_time(self) -> np.ndarray:  # pragma: no cover
+        """Computed travel time data"""
+        return self._travel_time
+
+    @property
+    def start_point(self) -> PointType:  # pragma: no cover
+        """Starting point"""
+        return self._start_point
+
+    @property
+    def end_point(self) -> PointType:  # pragma: no cover
+        """Ending point"""
+        return self._end_point
 
 
-@set_module(MPE_MODULE)
+@mpe_module
 class EndPointNotReachedError(PathExtractionError):
+    """The exception occurs when the ending point is not reached"""
+
     def __init__(self, *args,
                  travel_time: np.ndarray,
                  start_point: PointType,
@@ -42,6 +60,21 @@ class EndPointNotReachedError(PathExtractionError):
                  reason: str) -> None:
         super().__init__(*args, travel_time=travel_time, start_point=start_point, end_point=end_point)
 
-        self.extracted_points = extracted_points
-        self.last_distance = last_distance
-        self.reason = reason
+        self._extracted_points = extracted_points
+        self._last_distance = last_distance
+        self._reason = reason
+
+    @property
+    def extracted_points(self) -> List[FloatPointType]:  # pragma: no cover
+        """The list of extracted path points"""
+        return self._extracted_points
+
+    @property
+    def last_distance(self) -> float:  # pragma: no cover
+        """The last distance to the ending point from the last path point"""
+        return self._last_distance
+
+    @property
+    def reason(self) -> str:  # pragma: no cover
+        """The reason of extracting path termination"""
+        return self._reason

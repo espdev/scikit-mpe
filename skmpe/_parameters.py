@@ -2,32 +2,110 @@
 
 import contextlib
 import enum
+from typing import Type, Union
 
 from pydantic import confloat, conint, validator
+from scipy.integrate import RK23, RK45, DOP853, Radau, BDF, LSODA
 
-from ._base import MPE_MODULE, ImmutableDataObject
-from ._helpers import set_module
+from ._base import mpe_module, ImmutableDataObject
 
 
-@set_module(MPE_MODULE)
+@mpe_module
 class TravelTimeOrder(enum.IntEnum):
+    """The enumeration of travel time computation orders
+
+    Orders:
+
+        - **first** -- the first ordered travel time computation
+        - **second** -- the second ordered travel time computation
+
+    """
+
     first = 1
     second = 2
 
 
-@set_module(MPE_MODULE)
+SupportedOdeSolvers = Union[RK23, RK45, DOP853, Radau, BDF, LSODA]
+
+
+@mpe_module
 class OdeSolverMethod(str, enum.Enum):
-    RK23 = 'RK23'
-    RK45 = 'RK45'
-    DOP853 = 'DOP853'
-    Radau = 'Radau'
-    BDF = 'BDF'
-    LSODA = 'LSODA'
+    """The enumeration of supported ODE solver methods
+    """
+
+    RK23 = 'RK23', RK23
+    RK45 = 'RK45', RK45
+    DOP853 = 'DOP853', DOP853
+    Radau = 'Radau', Radau
+    BDF = 'BDF', BDF
+    LSODA = 'LSODA', LSODA
+
+    def __new__(cls, value: str, solver: Type[SupportedOdeSolvers]):
+        obj = str.__new__(cls, value)  # noqa
+        obj._value_ = value
+
+        obj.solver = solver
+        return obj
 
 
-@set_module(MPE_MODULE)
+@mpe_module
 class Parameters(ImmutableDataObject):
-    """MPE algorithm parameters
+    """MPE algorithm parameters model
+
+    .. py:attribute:: travel_time_spacing
+
+        The travel time computation spacing
+
+        | default: 1.0
+
+    .. py:attribute:: travel_time_order
+
+        The travel time computation order
+
+        | default: ``TravelTimeOrder.first``
+
+    .. py:attribute:: travel_time_cache
+
+        Use or not travel time computation cache for extracting paths with way points
+
+        | default: True
+
+    .. py:attribute:: ode_solver_method
+
+        ODE solver method
+
+        | default: 'RK45'
+
+    .. py:attribute:: integrate_time_bound
+
+        Integration time bound
+
+        | default: 10000
+
+    .. py:attribute:: integrate_min_step
+
+        Integration minimum step
+
+        | default: 0.0
+
+    .. py:attribute:: integrate_max_step
+
+        Integration maximum step
+
+        | default: 4.0
+
+    .. py:attribute:: dist_tol
+
+        Distance tolerance for control path evolution
+
+        | default: 1e-03
+
+    .. py:attribute:: max_small_dist_steps
+
+        The max number of small distance steps while path evolution
+
+        | default: 100
+
     """
 
     travel_time_spacing: confloat(gt=0.0) = 1.0
@@ -44,18 +122,22 @@ class Parameters(ImmutableDataObject):
     max_small_dist_steps: conint(strict=True, gt=1) = 100
 
     @validator('travel_time_order')
-    def _check_travel_time_order(cls, v):
-        if v == TravelTimeOrder.second:
+    def _check_travel_time_order(cls, v):  # noqa
+        if v == TravelTimeOrder.second:  # pragma: no cover
             raise ValueError(
                 'Currently the second order for computing travel time does not work properly.'
                 '\nSee the following issue for details: https://github.com/scikit-fmm/scikit-fmm/issues/28'
             )
         return v
 
+    def __str__(self):  # pragma: no cover
+        return self.__repr_str__('\n')
+
 
 _default_parameters = Parameters()
 
 
+@mpe_module
 @contextlib.contextmanager
 def parameters(**kwargs):
     """Context manager for using specified parameters
@@ -66,14 +148,35 @@ def parameters(**kwargs):
     kwargs : mapping
         The parameters
 
-            - **travel_time_spacing** --
-            - **travel_time_order** --
-            - **travel_time_cache** --
-            - **ode_solver_method** --
-            - **integrate_time_bound** --
-            - **integrate_min_step** --
-            - **dist_tol** --
-            - **max_small_dist_steps** --
+    Examples
+    --------
+
+    .. code-block:: python
+
+        >>> from skmpe import parameters
+        >>> with parameters(integrate_time_bound=200000) as params:
+        >>>     print(params.__repr__())
+
+        Parameters(
+            travel_time_spacing=1.0,
+            travel_time_order=<TravelTimeOrder.first: 1>,
+            travel_time_cache=False,
+            ode_solver_method=<OdeSolverMethod.RK45: 'RK45'>,
+            integrate_time_bound=200000.0,
+            integrate_min_step=0.0,
+            integrate_max_step=4.0,
+            dist_tol=0.001,
+            max_small_dist_steps=100
+        )
+
+    .. code-block:: python
+
+        from skmpe import parameters, mpe
+
+        ...
+
+        with parameters(integrate_time_bound=200000):
+            path_result = mpe(start_point, end_point)
 
     """
 
@@ -88,6 +191,7 @@ def parameters(**kwargs):
         _default_parameters = prev_default_parameters
 
 
+@mpe_module
 def default_parameters() -> Parameters:
     """Returns the default parameters
 
@@ -95,6 +199,28 @@ def default_parameters() -> Parameters:
     -------
     parameters : Parameters
         Default parameters
+
+    Examples
+    --------
+
+    .. code-block:: python
+
+        >>> from skmpe import default_parameters
+        >>> print(default_parameters().__repr__())
+
+        Parameters(
+            travel_time_spacing=1.0,
+            travel_time_order=<TravelTimeOrder.first: 1>,
+            travel_time_cache=False,
+            ode_solver_method=<OdeSolverMethod.RK45: 'RK45'>,
+            integrate_time_bound=10000.0,
+            integrate_min_step=0.0,
+            integrate_max_step=4.0,
+            dist_tol=0.001,
+            max_small_dist_steps=100
+        )
+
+
 
     """
 
