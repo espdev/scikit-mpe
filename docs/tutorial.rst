@@ -209,6 +209,8 @@ The following parameters may be important in some cases:
       Use :class:`OdeSolverMethod` enum for this parameter. By default it is Runge-Kutta 4/5 (`RK45`)
     - **integrate_time_bound** -- if we want to extract a long path we need to set a greater
       value for time bound. By default it is 10000
+    - **integrate_min_step**, **integrate_max_step** -- these options can be used to control of ODE solver steps.
+      For example, lower value of ``integrate_max_step`` leads to lower the performance, but higher the accuracy.
     - **dist_tol** -- distance tolerance between steps for control path evolution.
       By default it is 0.001
     - **max_small_dist_steps** -- the maximum number of small distance steps while path evolution.

@@ -45,6 +45,7 @@ Contents
     :maxdepth: 2
 
     tutorial
+    examples
     api
     changelog
 
