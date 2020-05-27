@@ -10,11 +10,19 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-from importlib_metadata import metadata
+from importlib_metadata import metadata, PackageNotFoundError
 
 
 # -- Project information -----------------------------------------------------
-project_metadata = metadata('scikit-mpe')
+PACKAGE_NAME = 'scikit-mpe'
+
+try:
+    project_metadata = metadata(PACKAGE_NAME)
+except PackageNotFoundError:
+    raise RuntimeError(
+        f"The package '{PACKAGE_NAME}' must be installed. "
+        "Please install the package in editable mode before building docs."
+    )
 
 project = project_metadata['name']
 author = project_metadata['author']
