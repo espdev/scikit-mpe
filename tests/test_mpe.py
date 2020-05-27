@@ -31,6 +31,8 @@ def test_extract_path_without_waypoints(retina_speed_image, travel_time_order, o
     with parameters(ode_solver_method=ode_method, travel_time_order=travel_time_order):
         path_info = mpe(retina_speed_image, start_point, end_point)
 
+    assert path_info.point_count > 0
+
     path_piece_info = path_info.pieces[0]
     start_travel_time = path_piece_info.travel_time[start_point[0], start_point[1]]
     end_travel_time = path_piece_info.travel_time[end_point[0], end_point[1]]
@@ -51,6 +53,8 @@ def test_extract_path_with_waypoints(retina_speed_image, travel_time_order,
                                      ttime_count, reversed_count):
     with parameters(travel_time_order=travel_time_order, travel_time_cache=ttime_cache):
         path_info = mpe(retina_speed_image, start_point, end_point, way_points)
+
+    assert path_info.point_count > 0
 
     for path_piece_info in path_info.pieces:
         start_pt = path_piece_info.start_point
