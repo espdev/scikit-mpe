@@ -45,8 +45,6 @@ Extracting the shortest paths through "bricks" image.
 
 .. plot::
 
-    from matplotlib import pyplot as plt
-
     from skimage.data import brick
     from skimage.transform import rescale
     from skimage.exposure import rescale_intensity, adjust_sigmoid
