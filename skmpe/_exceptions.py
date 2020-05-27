@@ -32,17 +32,17 @@ class PathExtractionError(MPEError):
         self._end_point = end_point
 
     @property
-    def travel_time(self) -> np.ndarray:
+    def travel_time(self) -> np.ndarray:  # pragma: no cover
         """Computed travel time data"""
         return self._travel_time
 
     @property
-    def start_point(self) -> PointType:
+    def start_point(self) -> PointType:  # pragma: no cover
         """Starting point"""
         return self._start_point
 
     @property
-    def end_point(self) -> PointType:
+    def end_point(self) -> PointType:  # pragma: no cover
         """Ending point"""
         return self._end_point
 
@@ -65,16 +65,16 @@ class EndPointNotReachedError(PathExtractionError):
         self._reason = reason
 
     @property
-    def extracted_points(self) -> List[FloatPointType]:
+    def extracted_points(self) -> List[FloatPointType]:  # pragma: no cover
         """The list of extracted path points"""
         return self._extracted_points
 
     @property
-    def last_distance(self) -> float:
+    def last_distance(self) -> float:  # pragma: no cover
         """The last distance to the ending point from the last path point"""
         return self._last_distance
 
     @property
-    def reason(self) -> str:
+    def reason(self) -> str:  # pragma: no cover
         """The reason of extracting path termination"""
         return self._reason

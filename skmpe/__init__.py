@@ -33,7 +33,7 @@ from skmpe._api import mpe
 
 try:
     __version__ = metadata('scikit-mpe')['version']
-except PackageNotFoundError:
+except PackageNotFoundError:  # pragma: no cover
     __version__ = '0.0.0.dev'
 
 

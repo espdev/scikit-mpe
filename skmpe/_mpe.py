@@ -131,7 +131,7 @@ class MinimalPathExtractor:
         return self._travel_time
 
     @property
-    def phi(self) -> np.ndarray:
+    def phi(self) -> np.ndarray:  # pragma: no cover
         """Returns the computed phi (zero contour) for given source point
         """
         return self._phi

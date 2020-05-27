@@ -9,7 +9,7 @@ from typing import Tuple, Sequence, List, NamedTuple, TYPE_CHECKING
 from pydantic import BaseModel, Extra, validator, root_validator
 import numpy as np
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from ._parameters import Parameters  # noqa
     from ._mpe import PathExtractionResult  # noqa
 

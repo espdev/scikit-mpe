@@ -123,14 +123,14 @@ class Parameters(ImmutableDataObject):
 
     @validator('travel_time_order')
     def _check_travel_time_order(cls, v):  # noqa
-        if v == TravelTimeOrder.second:
+        if v == TravelTimeOrder.second:  # pragma: no cover
             raise ValueError(
                 'Currently the second order for computing travel time does not work properly.'
                 '\nSee the following issue for details: https://github.com/scikit-fmm/scikit-fmm/issues/28'
             )
         return v
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return self.__repr_str__('\n')
 
 
