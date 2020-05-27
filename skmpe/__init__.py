@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from importlib_metadata import metadata, PackageNotFoundError
+
 from ._base import (
     InitialInfo,
     PathInfo,
@@ -29,7 +31,11 @@ from ._mpe import (
 from skmpe._api import mpe
 
 
-__version__ = '0.1.1'
+try:
+    __version__ = metadata('scikit-mpe')['version']
+except PackageNotFoundError:
+    __version__ = '0.0.0.dev'
+
 
 __all__ = [
     'InitialInfo',

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "scikit-mpe"
-version = "0.1.1"
+version = "0.2.0"
 description = "Minimal path extraction using the fast marching method"
 authors = ["Eugene Prilepin <esp.home@gmail.com>"]
 license = "MIT"
@@ -38,6 +38,7 @@ numpy = "^1.18.1"
 scipy = "^1.4.1"
 scikit-fmm = "^2019.1.30"
 pydantic = "^1.4"
+importlib-metadata = "^1.6.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.7.9"
