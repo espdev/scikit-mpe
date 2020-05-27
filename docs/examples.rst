@@ -41,7 +41,7 @@ Extracting the minimal path through the retina vessels with additional way point
 Bricks
 ======
 
-Extracting the shortest paths through "briks" image.
+Extracting the shortest paths through "bricks" image.
 
 .. plot::
 
