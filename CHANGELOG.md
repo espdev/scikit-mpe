@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.1 (27.05.2020)
+
+- Fix building docs on ReadTheDocs
+
 ## v0.2.0 (27.05.2020)
 
 - Refactoring the package with changing some low-level API

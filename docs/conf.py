@@ -10,34 +10,27 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-import sys
-import pathlib
-import toml
-import re
-
-ROOT_PATH = pathlib.Path(__file__).parent.parent
-
-sys.path.insert(0, str(ROOT_PATH))
-
-
-with (ROOT_PATH / 'pyproject.toml').open() as fp:
-    pyproject_toml = toml.load(fp)
-
-
-def get_author():
-    authors = pyproject_toml['tool']['poetry']['authors']
-    return re.sub(r'<.+>', '', authors[0]).strip()
+from importlib_metadata import metadata, PackageNotFoundError
 
 
 # -- Project information -----------------------------------------------------
+PACKAGE_NAME = 'scikit-mpe'
 
-project = pyproject_toml['tool']['poetry']['name']
-author = get_author()
+try:
+    project_metadata = metadata(PACKAGE_NAME)
+except PackageNotFoundError:
+    raise RuntimeError(
+        f"The package '{PACKAGE_NAME}' must be installed. "
+        "Please install the package in editable mode before building docs."
+    )
+
+project = project_metadata['name']
+author = project_metadata['author']
 copyright = f'2020, {author}'
 
 # The full version, including alpha/beta/rc tags
-version = pyproject_toml['tool']['poetry']['version']
-release = pyproject_toml['tool']['poetry']['version']
+version = project_metadata['version']
+release = version
 
 
 # -- General configuration ---------------------------------------------------
