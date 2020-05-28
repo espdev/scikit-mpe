@@ -267,3 +267,49 @@ The instance of this class is returning from :func:`mpe` function. The pieces of
       This data may be useful for debugging.
     - **reversed** -- The flag indicates that the path piece is reversed.
       This is relevant when using ``travel_time_cache == True`` parameter.
+
+
+Low-level API
+-------------
+
+If you need full control over the extracting process, you can use :class:`MinimalPathExtractor` class.
+The class is used inside :func:`mpe` function for extracting the pieces of path.
+
+Here is a simple example of usage:
+
+.. code-block:: python
+
+    from skmpe import MinimalPathExtractor, Parameters
+
+    speed_data = ...
+    start_point = ...
+    end_point = ...
+    parameters = Parameters(...)  # optional, also we can use 'parameters' context manager
+
+    # Create the instance and compute travel time data
+    mpe = MinimalPathExtractor(speed_data, end_point, parameters)
+
+    # get computed travel time data
+    travel_time = mpe.travel_time
+
+    # get phi (zero contour for given end_point)
+    phi = mpe.phi
+
+    # extract path from start_point to end_point
+    # it returns PathExtractionResult instance
+    extracting_result = mpe(start_point)
+
+    # the list of path points
+    path_points = extracting_result.path_points
+
+    # the list of integrate time values in every path point
+    path_integrate_times = extracting_result.path_integrate_times
+
+    # the list of travel time values in every path point
+    path_travel_times = extracting_result.path_travel_times
+
+    # the number of ODE solver steps
+    step_count = extracting_result.step_count
+
+    # the number of right hand function evaluations in ODE solver
+    func_eval_count = extracting_result.func_eval_count
