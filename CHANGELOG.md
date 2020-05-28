@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.2 (28.05.2020)
+
+- Update documentation: add maze example and low-level api section 
+
 ## v0.2.1 (27.05.2020)
 
 - Fix building docs on ReadTheDocs
