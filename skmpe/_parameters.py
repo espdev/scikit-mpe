@@ -4,7 +4,7 @@ import contextlib
 import enum
 from typing import Type, Union
 
-from pydantic import confloat, conint, validator
+from pydantic import confloat, conint
 from scipy.integrate import RK23, RK45, DOP853, Radau, BDF, LSODA
 
 from ._base import mpe_module, ImmutableDataObject
@@ -109,7 +109,7 @@ class Parameters(ImmutableDataObject):
     """
 
     travel_time_spacing: confloat(gt=0.0) = 1.0
-    travel_time_order: TravelTimeOrder = TravelTimeOrder.first
+    travel_time_order: TravelTimeOrder = TravelTimeOrder.second
     travel_time_cache: bool = False
 
     ode_solver_method: OdeSolverMethod = OdeSolverMethod.RK45
@@ -120,15 +120,6 @@ class Parameters(ImmutableDataObject):
 
     dist_tol: confloat(ge=0.0) = 1e-3
     max_small_dist_steps: conint(strict=True, gt=1) = 100
-
-    @validator('travel_time_order')
-    def _check_travel_time_order(cls, v):  # noqa
-        if v == TravelTimeOrder.second:  # pragma: no cover
-            raise ValueError(
-                'Currently the second order for computing travel time does not work properly.'
-                '\nSee the following issue for details: https://github.com/scikit-fmm/scikit-fmm/issues/28'
-            )
-        return v
 
     def __str__(self):  # pragma: no cover
         return self.__repr_str__('\n')

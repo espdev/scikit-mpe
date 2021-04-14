@@ -511,7 +511,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)", "win-inet-pton"]
 
 [[package]]
 name = "scikit-fmm"
-version = "2019.1.30"
+version = "2021.1.21"
 description = "An extension module implementing the fast marching method"
 category = "main"
 optional = false
@@ -708,7 +708,7 @@ docs = ["sphinx", "numpydoc", "m2r", "matplotlib", "scikit-image"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "d2a8e07f17aa1ce4f0392bbc74e4b4ef5816238e0ead5c671b5b87d300483060"
+content-hash = "35307806cf677c55a2ed33fd36ac38cddb42f87351dbb3ec224396e3d533015c"
 
 [metadata.files]
 alabaster = [
@@ -1123,11 +1123,10 @@ requests = [
     {file = "requests-2.25.1.tar.gz", hash = "sha256:27973dd4a904a4f13b263a19c866c13b92a39ed1c964655f025f3f8d3d75b804"},
 ]
 scikit-fmm = [
-    {file = "scikit-fmm-2019.1.30.tar.gz", hash = "sha256:eb64b6d8e30b8df8f8636d5fc4fd7ca6a9b05938ccd62518c80c1d9e823069dd"},
-    {file = "scikit-fmm-2019.1.30.win-amd64-py3.6.exe", hash = "sha256:ec9ffeb565ac3bdb890ffe82e12e4354dc3fbe949c4336276f9b75d64282e77a"},
-    {file = "scikit-fmm-2019.1.30.win-amd64-py3.7.exe", hash = "sha256:73d689a2c135946cdc5d79ceb3f0f4e89acdc405b131ec2be399e245057eb9a2"},
-    {file = "scikit_fmm-2019.1.30-cp36-cp36m-win_amd64.whl", hash = "sha256:2f07f9e444383d438fe4f7817740f21968a430c8cb04272c486837c8d19be9af"},
-    {file = "scikit_fmm-2019.1.30-cp37-cp37m-win_amd64.whl", hash = "sha256:49ad88b361b1a5103d2ba042a36fbb3810511cad4489848cec45432032128c41"},
+    {file = "scikit-fmm-2021.1.21.tar.gz", hash = "sha256:969e2ef66b452074f7fa0fa801a7eb839e4e9ff14e9019e245841dc5dfb556d6"},
+    {file = "scikit_fmm-2021.1.21-cp36-cp36m-win_amd64.whl", hash = "sha256:a2efdc67acf9b552c7b6e84d77b2a399caf3a5ced954aabdfc2bd2e54b7065d8"},
+    {file = "scikit_fmm-2021.1.21-cp37-cp37m-win_amd64.whl", hash = "sha256:15d47b3a7248164680fc44feaa6bf92d56485f60b90e2e4e2c4120c31b49ea95"},
+    {file = "scikit_fmm-2021.1.21-cp38-cp38-win_amd64.whl", hash = "sha256:21927ae939db4870667d20aa19509f9d3fa9776b35601879e7bb880f61453c93"},
 ]
 scikit-image = [
     {file = "scikit-image-0.16.2.tar.gz", hash = "sha256:dd7fbd32da74d4e9967dc15845f731f16e7966cee61f5dc0e12e2abb1305068c"},

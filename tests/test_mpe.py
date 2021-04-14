@@ -12,7 +12,7 @@ TRAVEL_TIME_ABS_TOL = 100
 
 travel_time_order_param = pytest.mark.parametrize('travel_time_order', [
     pytest.param(1),
-    pytest.param(2, marks=pytest.mark.skip('https://github.com/scikit-fmm/scikit-fmm/issues/28')),
+    pytest.param(2),
 ])
 
 
