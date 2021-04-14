@@ -36,7 +36,7 @@ packages = [
 python = "^3.6"
 numpy = "^1.18.1"
 scipy = "^1.4.1"
-scikit-fmm = "^2019.1.30"
+scikit-fmm = ">=2021.1.21,<2021.2"
 pydantic = "^1.4"
 importlib-metadata = "^1.6.0"
 
