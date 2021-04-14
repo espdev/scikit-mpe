@@ -4,7 +4,7 @@ import contextlib
 import enum
 from typing import Type, Union
 
-from pydantic import confloat, conint, validator
+from pydantic import confloat, conint
 from scipy.integrate import RK23, RK45, DOP853, Radau, BDF, LSODA
 
 from ._base import mpe_module, ImmutableDataObject
