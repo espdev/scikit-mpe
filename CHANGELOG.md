@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.4 (23.05.2021)
+
+- Update scikit-fmm dependency version [#9](https://github.com/espdev/scikit-mpe/issues/9)
+
 ## v0.2.3 (14.04.2021)
 
 - Fixed [#1](https://github.com/espdev/scikit-mpe/issues/1)
